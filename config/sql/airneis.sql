@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : mer. 27 mars 2024 à 17:53
+-- Généré le : jeu. 28 mars 2024 à 11:12
 -- Version du serveur : 10.4.24-MariaDB
 -- Version de PHP : 8.1.6
 
@@ -150,6 +150,17 @@ CREATE TABLE `image_produit` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `marques`
+--
+
+CREATE TABLE `marques` (
+  `id` int(11) NOT NULL,
+  `nom` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `materiaux`
 --
 
@@ -222,7 +233,7 @@ CREATE TABLE `produits` (
 
 CREATE TABLE `produit_panier` (
   `id_panier_produit` int(11) NOT NULL,
-  `id_prouit` int(11) NOT NULL,
+  `id_produit` int(11) NOT NULL,
   `id_panier` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -304,6 +315,12 @@ ALTER TABLE `image_produit`
   ADD KEY `id_produit` (`id_produit`);
 
 --
+-- Index pour la table `marques`
+--
+ALTER TABLE `marques`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Index pour la table `materiaux`
 --
 ALTER TABLE `materiaux`
@@ -333,7 +350,9 @@ ALTER TABLE `panier`
 -- Index pour la table `produits`
 --
 ALTER TABLE `produits`
-  ADD KEY `categorie` (`categorie`);
+  ADD PRIMARY KEY (`id_produit`),
+  ADD KEY `categorie` (`categorie`),
+  ADD KEY `marque` (`marque`);
 
 --
 -- Index pour la table `produit_panier`
@@ -341,7 +360,7 @@ ALTER TABLE `produits`
 ALTER TABLE `produit_panier`
   ADD PRIMARY KEY (`id_panier_produit`),
   ADD KEY `id_panier` (`id_panier`),
-  ADD KEY `id_prouit` (`id_prouit`);
+  ADD KEY `id_prouit` (`id_produit`);
 
 --
 -- AUTO_INCREMENT pour les tables déchargées
@@ -408,6 +427,12 @@ ALTER TABLE `image_produit`
   MODIFY `id_image_produit` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT pour la table `marques`
+--
+ALTER TABLE `marques`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT pour la table `materiaux`
 --
 ALTER TABLE `materiaux`
@@ -432,10 +457,76 @@ ALTER TABLE `panier`
   MODIFY `id_panier` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT pour la table `produits`
+--
+ALTER TABLE `produits`
+  MODIFY `id_produit` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT pour la table `produit_panier`
 --
 ALTER TABLE `produit_panier`
   MODIFY `id_panier_produit` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- Contraintes pour les tables déchargées
+--
+
+--
+-- Contraintes pour la table `adresse_client`
+--
+ALTER TABLE `adresse_client`
+  ADD CONSTRAINT `adresse_client_ibfk_1` FOREIGN KEY (`id_client`) REFERENCES `client` (`id_client`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `adresse_client_ibfk_2` FOREIGN KEY (`id_adresse`) REFERENCES `adresses` (`id_adresse`) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+--
+-- Contraintes pour la table `client_paiement`
+--
+ALTER TABLE `client_paiement`
+  ADD CONSTRAINT `client_paiement_ibfk_1` FOREIGN KEY (`id_client`) REFERENCES `client` (`id_client`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `client_paiement_ibfk_2` FOREIGN KEY (`id_paiement`) REFERENCES `paiement` (`id_paiement`) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+--
+-- Contraintes pour la table `commandes`
+--
+ALTER TABLE `commandes`
+  ADD CONSTRAINT `commandes_ibfk_1` FOREIGN KEY (`id_etat`) REFERENCES `etat` (`id_etat`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `commandes_ibfk_2` FOREIGN KEY (`id_client`) REFERENCES `client` (`id_client`) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+--
+-- Contraintes pour la table `contenu_commande`
+--
+ALTER TABLE `contenu_commande`
+  ADD CONSTRAINT `contenu_commande_ibfk_1` FOREIGN KEY (`id_commande`) REFERENCES `commandes` (`id_commande`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `contenu_commande_ibfk_2` FOREIGN KEY (`id_produit`) REFERENCES `produits` (`id_produit`) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+--
+-- Contraintes pour la table `image_produit`
+--
+ALTER TABLE `image_produit`
+  ADD CONSTRAINT `image_produit_ibfk_1` FOREIGN KEY (`id_produit`) REFERENCES `produits` (`id_produit`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `image_produit_ibfk_2` FOREIGN KEY (`id_image`) REFERENCES `image` (`id_image`) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+--
+-- Contraintes pour la table `materiaux_produit`
+--
+ALTER TABLE `materiaux_produit`
+  ADD CONSTRAINT `materiaux_produit_ibfk_1` FOREIGN KEY (`id_matiere`) REFERENCES `materiaux` (`id_materiel`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `materiaux_produit_ibfk_2` FOREIGN KEY (`id_produit`) REFERENCES `produits` (`id_produit`) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+--
+-- Contraintes pour la table `produits`
+--
+ALTER TABLE `produits`
+  ADD CONSTRAINT `produits_ibfk_1` FOREIGN KEY (`categorie`) REFERENCES `categories` (`id_categorie`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `produits_ibfk_2` FOREIGN KEY (`marque`) REFERENCES `marques` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+--
+-- Contraintes pour la table `produit_panier`
+--
+ALTER TABLE `produit_panier`
+  ADD CONSTRAINT `produit_panier_ibfk_1` FOREIGN KEY (`id_produit`) REFERENCES `produits` (`id_produit`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `produit_panier_ibfk_2` FOREIGN KEY (`id_panier`) REFERENCES `panier` (`id_panier`) ON DELETE NO ACTION ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
