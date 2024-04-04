@@ -1,0 +1,54 @@
+
+<h1 class="text-center mb-5">liste Clients</h1>
+<div class="d-flex justify-content-center">
+    <table class="table" id="table-user">
+        <thead>
+            <tr>
+            <th scope="col">#</th>
+            <th scope="col">Prénom</th>
+            <th scope="col">Nom</th>
+            <th scope="col">Email</th>
+            <th scope="col">Téléphone</th>
+            <th scope="col">Adresse</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <th scope="row">{{ loop.index }}</th>
+                    <td>{{ user.prenom }}</td>
+                    <td>{{ user.nom }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.telephone }}</td>
+                    <td></td>
+                    <td><button class="btn btn-primary">MODIFIER</button></td>
+                    <td><button class="btn btn-danger">Supprimer</button></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="user-plus" id="user-plus">
+        <button class='btn btn-primary' id="add">Ajouter Utilisateur +</button>
+    </div>
+</div>
+
+<div class="add-user-form" id="add-user-form">
+    <img src={{asset('img/close.png')}} alt="close" class="close" id="close">
+    {% include 'forms/form-add-user.html.twig' %}
+</div>
+
+<script>
+    let close = document.getElementById("close");
+    let add = document.getElementById("add-user-form");
+    let addButton = document.getElementById("add");
+
+    addButton.addEventListener('click', () => {
+        console.log('test');
+        add.style.display = 'block';
+    });
+
+    close.addEventListener('click', () => {
+        console.log('test');
+        add.style.display = 'none';
+    });
+</script>

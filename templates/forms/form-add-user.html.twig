@@ -1,0 +1,54 @@
+<div>
+    <h1 class="text-start">Formulaire utilisateurs</h1>
+    <form action="{{ path('app_home') }}" method="post" onsubmit="return validateForm()">
+        <div class="d-flex flex-column align-items-center content-add-form">
+            <div class="row mb-3">
+                <div class="col-5">
+                    <label for="">Prénom</label>
+                    <input type="text" name="prenom" id="prenom" class="rounded-pill" required>
+                </div>
+                <div class="col-5">
+                    <label for="">Nom</label>
+                    <input type="text" name="nom" id="nom" class="rounded-pill" required>
+                </div>
+            </div>
+           
+             <div class="row mb-3 move">
+                <label for="">Email</label>
+                <input type="email" name="email" id="email" class="rounded-pill" >
+            </div>
+            <div class="row mb-3 move">
+                <label for="">Adresse Postale</label>
+                <input type="text" name="adresse" id="adresse" class="rounded-pill" >
+            </div>
+              <div class="row mb-3 move">
+                <label for="">Téléphone</label>
+                <input type="text" name="telephone" id="telephone" class="rounded-pill" >
+            </div>
+             <div class="row mb-3 move">
+                <label for="">Mot de passe</label>
+                <input type="password" name="mdp" id="mdp" class="rounded-pill" required>
+            </div>
+            <div class="row mb-3 move">
+                <label for="">Confirmer mot de passe</label>
+                <input type="password" name="Cmdp" id="Cmdp" class="rounded-pill" required>
+            </div>
+            <div class="left-4 mt-5">
+                <input type="submit" value="Envoyer" class="btn btn-primary" style="padding: 20% 50%; position: relative; right:100%;">
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    function validateForm() {
+        var mdp = document.getElementById('mdp').value;
+        var Cmdp = document.getElementById('Cmdp').value;
+
+        if (mdp !== Cmdp) {
+            alert('Les mots de passe ne correspondent pas.');
+            return false; // Empêcher l'envoi du formulaire si les mots de passe ne correspondent pas
+        }
+
+        return true; // Envoyer le formulaire si les mots de passe correspondent
+    }
+</script>

@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    <div class="row nav">
+        <div class="col-3 pt-5 widget">
+            <a href="/"><img class="logo position-absolute top-0 left-0" src={{asset('img/logo.png')}} alt="logo"></a>
+            <ul class="mt-3">
+                <li class="mb-1 active" id="general">Général</li>
+                <li class="mb-1" id="categorie">Catégories</li>
+                <li class="mb-1" id="produits">Produits</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-9 element" id="content">
+        <!-- Contenu qui sera remplacé dynamiquement -->
+    </div>
+
+    <script>
+
+        var categorie = document.getElementById('categorie');
+        
+        categorie.addEventListener('click', function() {
+            general.style.background = 'skyblue';
+            categorie.style.background = 'rgb(169, 221, 241)';
+            produits.style.background = 'skyblue';
+            loadContent('categorie');
+        });
+
+        var general = document.getElementById('general');
+        
+        general.addEventListener('click', function() {
+            general.style.background = 'rgb(169, 221, 241)';
+            categorie.style.background = 'skyblue';
+            produits.style.background = 'skyblue';
+            loadContent('liste');
+        });
+
+        var produits = document.getElementById('produits');
+        
+        produits.addEventListener('click', function() {
+            general.style.background = 'skyblue';
+            categorie.style.background = 'skyblue';
+            produits.style.background = 'rgb(169, 221, 241)';
+            loadContent('categorie.html.twig');
+        });
+
+         window.onload = function() {
+            // Charge le contenu "Général" par défaut
+            general.style.background = 'rgb(169, 221, 241)';
+            categorie.style.background = 'skyblue';
+            produits.style.background = 'skyblue';
+            loadContent('liste');
+        };
+
+        // Ajoutez des gestionnaires d'événements similaires pour les autres liens
+
+        function loadContent(url) {
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('content').innerHTML = html;
+                });
+        }
+        
+</script>
+{% endblock %}
