@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+
+
+{% block body %}
+
+<div class="row home">
+    <div class="col-5 text-center">
+        <img class="w-50" src={{asset('img/logo_back.png')}} alt="logo">
+    </div>
+    <div class="col-1 line-separator"></div>
+    <div class="col">
+        <form action="/home" method="post">
+            <fieldset class='form-connexion'>
+                <legend class="">Connexion</legend>
+                <div class="d-flex flex-column my-3">
+                    <label class="mb-2" for="">Identifiant</label>
+                    <input class="w-50" type="text" name="identifiant" id="identifiant">
+                </div>
+                <div class="d-flex flex-column">
+                    <label class="mb-2" for="">Mot de passe</label>
+                    <input class="w-50" type="password" name="identifiant" id="identifiant">
+                </div>
+            </fieldset>
+        </form>
+    </div>
+    
+</div>
+{% endblock %}

@@ -7,6 +7,9 @@
 -- Version du serveur : 10.4.24-MariaDB
 -- Version de PHP : 8.1.6
 
+CREATE DATABASE IF NOT EXISTS airneis;
+USE airneis;
+
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -216,7 +219,7 @@ CREATE TABLE `panier` (
 CREATE TABLE `produits` (
   `id_produit` int(11) NOT NULL,
   `reference` varchar(15) NOT NULL,
-  `nom` int(50) NOT NULL,
+  `nom` VARCHAR(100) NOT NULL,
   `prix` float NOT NULL,
   `description` varchar(1000) NOT NULL,
   `quantite` int(5) NOT NULL,
