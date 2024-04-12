@@ -20,7 +20,8 @@ class CategorieController extends AbstractController
     {
         return $this->render('categorie.html.twig', [
             'controller_name' => 'CategorieController',
-            'categories' => $this->displaycategorie()
+            'categories' => $this->displaycategorie(),
+            'tableHedears' => ['Nom']
         ]);
     }
 

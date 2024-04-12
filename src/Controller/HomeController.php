@@ -2,9 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Adresse;
+use App\Entity\Adresses;
 use App\Entity\Client;
-use App\Repository\CategoriesRepository;
 use App\Repository\ClientRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -37,7 +36,7 @@ class HomeController extends AbstractController
 
             // Créer une instance de votre entité
             $client = new Client(); // Remplacez "VotreEntity" par le nom de votre entité
-            $adress = new Adresse(); 
+            $adress = new Adresses(); 
 
             $shearch = $adress->getRue()." ".$adress->getCodePostal()." ".$adress->getVille();
             if($shearch == $adresse){
@@ -50,7 +49,7 @@ class HomeController extends AbstractController
             $client->setPrenom($prenom);
             $client->setNom($nom);
             $client->setEmail($email);
-            $client->setIdAdresse($idadresse);
+            $client->setAdresse($idadresse);
             $client->setTelephone($phone);
             $client->setMotdepasse($mdpHash);
 

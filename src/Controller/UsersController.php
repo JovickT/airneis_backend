@@ -23,7 +23,8 @@ class UsersController extends AbstractController
     {
         return $this->render('user.html.twig', [
             'controller_name' => 'UsersController',
-            'users' => $this->getAllUsers()
+            'users' => $this->getAllUsers(),
+            'tableHedears' => ['Prénom','Nom','Email','Téléphone','Rôle','Adresse']
         ]);
     }
 
