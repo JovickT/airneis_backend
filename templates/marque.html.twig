@@ -1,0 +1,36 @@
+
+<h1 class="text-center mb-5">Liste Marques</h1>
+<div class="d-flex justify-content-center Goverflow">
+    <table class="table" id="table-user">
+        <thead>
+            <tr>
+            <th scope="col"><input type="checkbox" name="all" id="all" onClick="toggleAllCheckboxes()"></th>
+            {% for th in tableHedears %}
+                <th scope="col">{{th}}</th>
+            {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for marque in marques %}
+                <tr>
+                    <th scope="row"><input type="checkbox" name="chleckbox-{{ loop.index }}" id="checkbox-{{ loop.index }}"></th>
+                    <td>{{ marque.nom }}</td>
+                    <td><button class="btn btn-primary" id="modifier-{{ loop.index }}">MODIFIER</button></td>
+                    <td><button class="btn btn-danger" id="supprimer-{{ loop.index }}">Supprimer</button></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+</div>
+<div class="user-plus" id="user-plus">
+    <button class='btn btn-primary' id="add">Ajouter une Marque +</button>
+</div>
+<div class="add-user-form" id="add-user-form">
+    <img src={{asset('img/close.png')}} alt="close" class="close" id="close">
+    {% include 'forms/form-add-user.html.twig' %}
+</div>
+
+<script>
+
+</script>

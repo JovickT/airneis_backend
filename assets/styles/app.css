@@ -66,10 +66,11 @@ body {
 }
 
 .user-plus{
-    position: absolute;
-    bottom: 0;
-    right: 0;
+  
     margin: 3% 3%;
+    position: absolute;
+    right: 0;
+    bottom: 0;
 }
 
 .add-user{
@@ -111,4 +112,13 @@ body {
     top: 0;
     width: 5%;
     cursor: pointer;
+}
+
+.Goverflow{
+    height: 80%;
+    overflow-y: scroll;
+}
+
+.w-10{
+    width: 10%;
 }
