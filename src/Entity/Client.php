@@ -31,7 +31,7 @@ class Client
 
     #[ORM\ManyToOne(targetEntity: Adresses::class)]
     #[ORM\JoinColumn(name: "id_adresse", referencedColumnName: "id_adresse")]
-    private $id_adresse;
+    private $adresse;
 
     #[ORM\Column]
     private ?int $role = null;
@@ -104,12 +104,12 @@ class Client
 
     public function getAdresse(): ?Adresses
     {
-        return $this->id_adresse;
+        return $this->adresse;
     }
 
-    public function setAdresse(?Adresses $id_adresse): self
+    public function setAdresse(?Adresses $adresse): self
     {
-        $this->id_adresse = $id_adresse;
+        $this->adresse = $adresse;
 
         return $this;
     }

@@ -19,6 +19,11 @@
         <!-- Contenu qui sera remplacé dynamiquement -->
     </div>
 
+    <div class="add-user-form" id="add-user-form">
+        <img src={{asset('img/close.png')}} alt="close" class="close" id="close">
+        {% include 'forms/formClient.html.twig' %}
+    </div>
+
     <script>
 
         var categorie = document.getElementById('categorie');
@@ -95,6 +100,18 @@
                     document.getElementById('content').innerHTML = html;
                 });
         }
+
+        let close = document.getElementById("close");
+        let add = document.getElementById("add-user-form");
+        addButton.addEventListener('click', () => {
+            console.log('test');
+            add.style.display = 'block';
+        });
+
+        close.addEventListener('click', () => {
+            console.log('test');
+            add.style.display = 'none';
+        });
         
 </script>
 {% endblock %}

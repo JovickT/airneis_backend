@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Client;
+use App\Form\FormClientType;
 use App\Repository\ClientRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,6 +18,7 @@ class UsersController extends AbstractController
 
     public function __construct(private EntityManagerInterface $entityManager, ClientRepository $clientRepository) {
         $this->clientRepository = $clientRepository;
+       
     }
 
     #[Route('/liste', name: 'app_users')]
@@ -34,14 +37,6 @@ class UsersController extends AbstractController
 
         // Faites quelque chose avec les utilisateurs, par exemple, les passer à un modèle pour les afficher dans une vue
         return  $users;
-    }
-
-    #[Route('/add-user', name: 'app_add')]
-    public function add(): Response
-    {
-        return $this->render('forms/form-add-user.html.twig', [
-            'controller_name' => 'UsersController',
-        ]);
     }
 
 }

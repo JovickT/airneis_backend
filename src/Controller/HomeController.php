@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Adresses;
 use App\Entity\Client;
+use App\Form\FormClientType;
 use App\Repository\ClientRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -64,7 +65,13 @@ class HomeController extends AbstractController
 
       
         return $this->render('layout.html.twig', [
-            'controller_name' => 'HomeController'
+            'controller_name' => 'HomeController',
+            'form' => $this->callFormAddUser(),
         ]);
+    }
+
+    public function callFormAddUser(){
+        $client = new Client();
+        return $this->createForm(FormClientType::class, $client);
     }
 }
