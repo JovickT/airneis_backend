@@ -66,6 +66,13 @@ class HomeController extends AbstractController
       
         return $this->render('layout.html.twig', [
             'controller_name' => 'HomeController',
+        ]);
+    }
+
+    #[Route('/addClient', name: 'app_form_client')]
+    public function displayAddForm(){
+        return $this->render('forms/formClient.html.twig', [
+            'controller_name' => 'formClientController',
             'form' => $this->callFormAddUser(),
         ]);
     }
