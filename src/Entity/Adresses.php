@@ -2,16 +2,16 @@
 
 namespace App\Entity;
 
-use App\Repository\AdresseRepository;
+use App\Repository\AdressesRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: AdresseRepository::class)]
-class Adresse
+#[ORM\Entity(repositoryClass: AdressesRepository::class)]
+class Adresses
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    private ?int $id_adresse = null;
 
     #[ORM\Column(length: 50)]
     private ?string $pays = null;
@@ -27,7 +27,7 @@ class Adresse
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->id_adresse;
     }
 
     public function getPays(): ?string

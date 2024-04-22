@@ -2,9 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\Adresse;
+use App\Entity\Adresses;
 use App\Entity\Client;
-use App\Repository\CategoriesRepository;
+use App\Form\FormClientType;
 use App\Repository\ClientRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -37,7 +37,7 @@ class HomeController extends AbstractController
 
             // Créer une instance de votre entité
             $client = new Client(); // Remplacez "VotreEntity" par le nom de votre entité
-            $adress = new Adresse(); 
+            $adress = new Adresses(); 
 
             $shearch = $adress->getRue()." ".$adress->getCodePostal()." ".$adress->getVille();
             if($shearch == $adresse){
@@ -50,7 +50,7 @@ class HomeController extends AbstractController
             $client->setPrenom($prenom);
             $client->setNom($nom);
             $client->setEmail($email);
-            $client->setIdAdresse($idadresse);
+            $client->setAdresse($idadresse);
             $client->setTelephone($phone);
             $client->setMotdepasse($mdpHash);
 
@@ -65,7 +65,20 @@ class HomeController extends AbstractController
 
       
         return $this->render('layout.html.twig', [
-            'controller_name' => 'HomeController'
+            'controller_name' => 'HomeController',
         ]);
+    }
+
+    #[Route('/addClient', name: 'app_form_client')]
+    public function displayAddForm(){
+        return $this->render('forms/formClient.html.twig', [
+            'controller_name' => 'formClientController',
+            'form' => $this->callFormAddUser(),
+        ]);
+    }
+
+    public function callFormAddUser(){
+        $client = new Client();
+        return $this->createForm(FormClientType::class, $client);
     }
 }

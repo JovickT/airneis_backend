@@ -47,8 +47,34 @@ class ClientRepository extends ServiceEntityRepository
     //    }
 
         public function getAllUsers(){
-            return $this->createQueryBuilder('c')
+            $users = $this->createQueryBuilder('c')
             ->getQuery()
             ->getResult();
+
+            $usersArray = [];
+            foreach ($users as $user) {
+                $userData = [];
+                // $userData['id'] = $user->getIdClient();
+                $userData['prenom'] = $user->getPrenom();
+                $userData['nom'] = $user->getNom();
+                $userData['email'] = $user->getEmail();
+                $userData['telephone'] = $user->getTelephone();
+                $role = $user->getRole();
+                if($role){
+                    $userData['role'] = 'Admin';
+                }else{
+                    $userData['role'] = 'Client';
+                }
+                $adresse = $user->getAdresse();
+                if ($adresse) {
+                    $userData['adresse'] = $adresse->getRue().' '.$adresse->getCodePostal().' '.$adresse->getVille();
+                } else {
+                    $userData['adresse'] = null;
+                }
+        
+                $usersArray[] = $userData;
+            }
+
+            return $usersArray;
         }
 }

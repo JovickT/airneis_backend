@@ -1,14 +1,16 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-
+    
     <div class="row nav">
         <div class="col-3 pt-5 widget">
             <a href="/"><img class="logo position-absolute top-0 left-0" src={{asset('img/logo.png')}} alt="logo"></a>
-            <ul class="mt-3">
+            <ul class="mt-5">
                 <li class="mb-1 active" id="general">Général</li>
                 <li class="mb-1" id="categorie">Catégories</li>
                 <li class="mb-1" id="produits">Produits</li>
+                <li class="mb-1" id="marques">Marques</li>
+                <li class="mb-1" id="materiaux">Materiaux</li>
             </ul>
         </div>
     </div>
@@ -20,31 +22,63 @@
     <script>
 
         var categorie = document.getElementById('categorie');
+        var general = document.getElementById('general');
+        var produits = document.getElementById('produits');
+        var marques = document.getElementById('marques');
+        var materiaux = document.getElementById('materiaux');
+
+        //var add = document.getElementById('add');
+
         
         categorie.addEventListener('click', function() {
             general.style.background = 'skyblue';
             categorie.style.background = 'rgb(169, 221, 241)';
             produits.style.background = 'skyblue';
+            marques.style.background = 'skyblue';
+            materiaux.style.background = 'skyblue';
             loadContent('categorie');
         });
 
-        var general = document.getElementById('general');
         
         general.addEventListener('click', function() {
             general.style.background = 'rgb(169, 221, 241)';
             categorie.style.background = 'skyblue';
             produits.style.background = 'skyblue';
+             marques.style.background = 'skyblue';
+            materiaux.style.background = 'skyblue';
             loadContent('liste');
         });
 
-        var produits = document.getElementById('produits');
         
         produits.addEventListener('click', function() {
             general.style.background = 'skyblue';
             categorie.style.background = 'skyblue';
             produits.style.background = 'rgb(169, 221, 241)';
-            loadContent('categorie.html.twig');
+             marques.style.background = 'skyblue';
+            materiaux.style.background = 'skyblue';
+            loadContent('produit');
         });
+
+        
+        marques.addEventListener('click', function() {
+            general.style.background = 'skyblue';
+            categorie.style.background = 'skyblue';
+            produits.style.background = 'skyblue';
+            marques.style.background = 'rgb(169, 221, 241)';
+            materiaux.style.background = 'skyblue';
+            loadContent('marque');
+        });
+
+        
+        materiaux.addEventListener('click', function() {
+            general.style.background = 'skyblue';
+            categorie.style.background = 'skyblue';
+            produits.style.background = 'skyblue';
+             marques.style.background = 'skyblue';
+            materiaux.style.background = 'rgb(169, 221, 241)';
+            loadContent('materiel');
+        });
+
 
          window.onload = function() {
             // Charge le contenu "Général" par défaut
@@ -63,6 +97,7 @@
                     document.getElementById('content').innerHTML = html;
                 });
         }
+
         
 </script>
 {% endblock %}

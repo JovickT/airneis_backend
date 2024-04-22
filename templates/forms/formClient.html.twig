@@ -1,0 +1,17 @@
+{% block form_start %}
+    <form method="post">
+{% endblock %}
+
+{% block form_fields %}
+    {{ form_row(form.prenom) }}
+    {{ form_row(form.nom) }}
+    {{ form_row(form.email) }}
+    {{ form_row(form.mot_de_passe) }}
+    {{ form_row(form.telephone) }}
+    {{ form_row(form.adresse) }}
+    {{ form_row(form.role) }}
+{% endblock %}
+
+{% block form_end %}
+    </form>
+{% endblock %}

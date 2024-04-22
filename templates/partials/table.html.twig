@@ -1,0 +1,24 @@
+<div class="d-flex justify-content-center table-responsive Goverflow">
+    <table class="table" id="table-user" data-toggle="table">
+        <thead>
+            <tr>
+                <th scope="col"><input type="checkbox" name="all" id="all" onClick="toggleAllCheckboxes()"></th>
+                {% for th in headers %}
+                    <th scope="col" data-sortable="true" data-field="{{th}}" class="w-10">{{ th }} <span class="glyphicon glyphicon-arrow-up" onClick="toggleTri('{{th}}')"></span></th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                <tr>
+                    <th scope="row"><input type="checkbox" name="chleckbox-{{ loop.index }}" id="checkbox-{{ loop.index }}"></th>
+                    {% for data in row %}
+                        <td>{{ data }}</td>
+                    {% endfor %}
+                    <td><button class="btn btn-primary" id="modifier-{{ loop.index }}">MODIFIER</button></td>
+                    <td><button class="btn btn-danger" id="supprimer-{{ loop.index }}">Supprimer</button></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

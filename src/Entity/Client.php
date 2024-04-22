@@ -29,8 +29,12 @@ class Client
     #[ORM\Column(length: 15)]
     private ?string $telephone = null;
 
+    #[ORM\ManyToOne(targetEntity: Adresses::class)]
+    #[ORM\JoinColumn(name: "id_adresse", referencedColumnName: "id_adresse")]
+    private $adresse;
+
     #[ORM\Column]
-    private ?int $id_adresse = null;
+    private ?int $role = null;
 
    
     public function getIdClient(): ?int
@@ -98,15 +102,28 @@ class Client
         return $this;
     }
 
-    public function getIdAdresse(): ?int
+    public function getAdresse(): ?Adresses
     {
-        return $this->id_adresse;
+        return $this->adresse;
     }
 
-    public function setIdAdresse(?int $id_adresse): static
+    public function setAdresse(?Adresses $adresse): self
     {
-        $this->id_adresse = $id_adresse;
+        $this->adresse = $adresse;
 
         return $this;
     }
+
+    public function getRole(): ?int
+    {
+        return $this->role;
+    }
+
+    public function setRole(?int $role): static
+    {
+        $this->role = $role;
+
+        return $this;
+    }
+    
 }

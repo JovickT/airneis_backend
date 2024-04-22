@@ -1,40 +1,7 @@
-
-<h1 class="text-center mb-5">liste Clients</h1>
-<div class="d-flex justify-content-center">
-    <table class="table" id="table-user">
-        <thead>
-            <tr>
-            <th scope="col">#</th>
-            <th scope="col">Prénom</th>
-            <th scope="col">Nom</th>
-            <th scope="col">Email</th>
-            <th scope="col">Téléphone</th>
-            <th scope="col">Adresse</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-                <tr>
-                    <th scope="row">{{ loop.index }}</th>
-                    <td>{{ user.prenom }}</td>
-                    <td>{{ user.nom }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.telephone }}</td>
-                    <td></td>
-                    <td><button class="btn btn-primary">MODIFIER</button></td>
-                    <td><button class="btn btn-danger">Supprimer</button></td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <div class="user-plus" id="user-plus">
-        <button class='btn btn-primary' id="add">Ajouter Utilisateur +</button>
-    </div>
-</div>
-
-<div class="add-user-form" id="add-user-form">
-    <img src={{asset('img/close.png')}} alt="close" class="close" id="close">
-    {% include 'forms/form-add-user.html.twig' %}
+<h1 class="text-center mb-5">Liste Clients</h1>
+{% include 'partials/table.html.twig' with {'headers': tableHedears, 'rows': users} %}
+<div class="user-plus" id="user-plus">
+    <a class="btn btn-primary" id="add" href="{{ path('app_form_client') }}">Ajouter Utilisateur +</a>
 </div>
 
 <script>
@@ -51,4 +18,19 @@
         console.log('test');
         add.style.display = 'none';
     });
+
+    function toggleAllCheckboxes() {
+        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(function(checkbox) {
+            checkbox.checked = document.getElementById('all').checked;
+        });
+    }
+
+    function toggleTri(column){
+        console.log('toggleTri:',column);
+    }
+
+    function displayAddFormClient(){
+        window.location.href = "/addClient";S
+    }
 </script>
