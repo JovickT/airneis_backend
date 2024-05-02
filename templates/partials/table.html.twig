@@ -1,24 +1,58 @@
-<div class="d-flex justify-content-center table-responsive Goverflow">
-    <table class="table" id="table-user" data-toggle="table">
-        <thead>
-            <tr>
-                <th scope="col"><input type="checkbox" name="all" id="all" onClick="toggleAllCheckboxes()"></th>
-                {% for th in headers %}
-                    <th scope="col" data-sortable="true" data-field="{{th}}" class="w-10">{{ th }} <span class="glyphicon glyphicon-arrow-up" onClick="toggleTri('{{th}}')"></span></th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in rows %}
-                <tr>
-                    <th scope="row"><input type="checkbox" name="chleckbox-{{ loop.index }}" id="checkbox-{{ loop.index }}"></th>
-                    {% for data in row %}
-                        <td>{{ data }}</td>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">{{ title }}</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            
+            <div class="my-3" style="text-align: end">
+                {% if app.request.attributes.get('_route') == 'app_users' %}
+                    <a href="{{ path('app_form_client') }}"><button class="btn btn-primary">Ajouter utilisateur</button></a>
+                {% elseif app.request.attributes.get('_route') == 'app_produit' %}
+                    <a href="{{ path('app_form_produit') }}"><button class="btn btn-primary">Ajouter un produit</button></a>
+                {% elseif app.request.attributes.get('_route') == 'app_marque' %}
+                    <a href="{{ path('app_form_marque') }}"><button class="btn btn-primary">Ajouter une marque</button></a>
+                {% elseif app.request.attributes.get('_route') == 'app_materiel' %}
+                    <a href="{{ path('app_form_materiel') }}"><button class="btn btn-primary">Ajouter un materiaux</button></a>
+                {% else %}
+                    <a href="{{ path('app_dashbord') }}"><button class="btn btn-primary">Dashbord</button></a>
+                {% endif %}
+            </div>
+
+
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        {% for th in headers %}
+                            <th>{{ th }}</th>
+                        {% endfor %}
+                        <th>Modification</th>
+                        <th>Supression</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        {% for th in headers %}
+                            <th>{{ th }}</th>
+                        {% endfor %}
+                        <th>Modification</th>
+                        <th>Supression</th>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    {% for row in rows %}
+                        <tr>
+                            {% for data in row %}
+                                <td>{{ data }}</td>
+                            {% endfor %}
+                            <td><button class="btn btn-primary" id="modifier-{{ loop.index }}">MODIFIER</button></td>
+                            <td><button class="btn btn-danger" id="supprimer-{{ loop.index }}">Supprimer</button></td>
+                        </tr>
                     {% endfor %}
-                    <td><button class="btn btn-primary" id="modifier-{{ loop.index }}">MODIFIER</button></td>
-                    <td><button class="btn btn-danger" id="supprimer-{{ loop.index }}">Supprimer</button></td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+

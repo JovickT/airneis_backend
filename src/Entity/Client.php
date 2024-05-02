@@ -29,12 +29,12 @@ class Client
     #[ORM\Column(length: 15)]
     private ?string $telephone = null;
 
-    #[ORM\ManyToOne(targetEntity: Adresses::class)]
+    #[ORM\ManyToOne(targetEntity: Adresses::class, cascade: ["persist"])]
     #[ORM\JoinColumn(name: "id_adresse", referencedColumnName: "id_adresse")]
-    private $adresse;
-
+    private ?Adresses $adresse;
+    
     #[ORM\Column]
-    private ?int $role = null;
+    private ?bool $role = null;
 
    
     public function getIdClient(): ?int
@@ -114,12 +114,12 @@ class Client
         return $this;
     }
 
-    public function getRole(): ?int
+    public function getRole(): ?bool
     {
         return $this->role;
     }
 
-    public function setRole(?int $role): static
+    public function setRole(?bool $role): static
     {
         $this->role = $role;
 

@@ -77,4 +77,18 @@ class ClientRepository extends ServiceEntityRepository
 
             return $usersArray;
         }
+
+        public function getAllEmails(): array
+        {
+            $emails = $this->createQueryBuilder('c')
+                ->select('c.email')
+                ->getQuery()
+                ->getResult();
+
+            $emailList = array_column($emails, 'email');
+
+            return $emailList;
+        }
+
+
 }

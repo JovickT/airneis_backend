@@ -24,13 +24,17 @@ class FormProduitType extends AbstractType
                 'widget' => 'single_text',
             ])
             ->add('marque', EntityType::class, [
-                'class' => Marques::class,
-                'choice_label' => 'id',
+                'class' => Marques::class, // Remplacez Marque::class par votre entité de marque
+                'choice_label' => 'nom', // Le champ de l'entité à afficher dans la liste déroulante
+                'placeholder' => 'Choisir une marque', // Optionnel : message affiché par défaut
+                'attr' => ['class' => 'form-control'] // Classes CSS supplémentaires
             ])
             ->add('categorie', EntityType::class, [
-                'class' => Categories::class,
-                'choice_label' => 'id',
-            ])
+                'class' => Categories::class, // Remplacez Categorie::class par votre entité de catégorie
+                'choice_label' => 'nom', // Le champ de l'entité à afficher dans la liste déroulante
+                'placeholder' => 'Choisir une catégorie', // Optionnel : message affiché par défaut
+                'attr' => ['class' => 'form-control'] // Classes CSS supplémentaires
+            ]);
         ;
     }
 

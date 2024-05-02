@@ -2,10 +2,10 @@
 
 namespace App\Form;
 
-use App\Entity\Adresses;
 use App\Entity\Client;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -17,13 +17,13 @@ class FormClientType extends AbstractType
             ->add('prenom')
             ->add('nom')
             ->add('email')
-            ->add('mot_de_passe')
-            ->add('telephone')
-            ->add('role')
-            ->add('adresse', EntityType::class, [
-                'class' => Adresses::class,
-                'choice_label' => 'id',
+            ->add('mot_de_passe', PasswordType::class)
+            ->add('telephone', null, [
+                'required' => false,
             ])
+            ->add('role')
+            ->add('adresse', FormAdresseType::class)
+            ->add('save', SubmitType::class, ['label' => 'Ajouter'])
         ;
     }
 

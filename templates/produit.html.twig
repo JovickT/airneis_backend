@@ -1,44 +1,7 @@
+{% extends 'layout.html.twig' %}
 
-<h1 class="text-center mb-5">Liste Produits</h1>
+{% block content %}
+    {% include 'partials/table.html.twig' with {'headers': tableHedears, 'rows': produits} %}
+{% endblock %}
 
-{% include 'partials/table.html.twig' with {'headers': tableHedears, 'rows': produits} %}
 
-<div class="user-plus" id="user-plus">
-    <button class='btn btn-primary' id="add">Ajouter Utilisateur +</button>
-</div>
-<div class="add-user-form" id="add-user-form">
-    <img src={{asset('img/close.png')}} alt="close" class="close" id="close">
-    {# {% include 'forms/form-add-user.html.twig' %} #}
-</div>
-
-<script>
-    let close = document.getElementById("close");
-    let add = document.getElementById("add-user-form");
-    let addButton = document.getElementById("add");
-
-    addButton.addEventListener('click', () => {
-        console.log('test');
-        add.style.display = 'block';
-    });
-
-    close.addEventListener('click', () => {
-        console.log('test');
-        add.style.display = 'none';
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Récupérer la case à cocher principale
-        var mainCheckbox = document.getElementById('all');
-
-        // Récupérer toutes les cases à cocher dépendantes
-        var dependentCheckboxes = document.querySelectorAll('.dependentCheckbox');
-
-        // Ajouter un gestionnaire d'événements pour détecter les changements de la case à cocher principale
-        mainCheckbox.addEventListener('click', function() {
-            // Mettre à jour l'état de toutes les cases à cocher dépendantes selon l'état de la case à cocher principale
-            dependentCheckboxes.forEach(function(checkbox) {
-                checkbox.checked = mainCheckbox.checked;
-            });
-        });
-    });
-</script>
