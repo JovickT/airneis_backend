@@ -52,7 +52,7 @@
                                 {% if app.request.attributes.get('_route') == 'app_users' %}
                                     <td><a href="{{ path('app_form_users_upd', {'email': row["email"]}) }}" class="btn btn-primary" >MODIFIER</button></a>
                                     <td>
-                                        <form id="deleteForm{{ loop.index }}" action="{{ path('app_form_users_delete', { 'nom': row["nom"] }) }}" method="post">
+                                        <form id="deleteForm{{ loop.index }}" action="{{ path('app_form_users_delete', { 'email': row["email"] }) }}" method="post">
                                             <button type="submit" class="btn btn-danger">Supprimer</button>
                                         </form>
                                     </td>
@@ -104,6 +104,9 @@
                 var nom = $(this).attr('id').replace('deleteForm', '');
                 $('#deleteNomInput').val(nom);
                 $('#confirmDeleteModal').modal('show');
+
+                 // Ajoutez l'action du formulaire de confirmation
+                $('#confirmDeleteForm').attr('action', $(this).attr('action'));
             });
 
             $('#confirmDeleteForm').submit(function() {

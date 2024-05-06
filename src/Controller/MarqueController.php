@@ -106,13 +106,13 @@ class MarqueController extends AbstractController
         ]);
     }
 
-    #[Route('/deleteMarque', name: 'app_form_marque_delete')]
+    #[Route('deleteMarque/{nom}', name: 'app_form_marque_delete')]
     public function displayDeleteForm(EntityManagerInterface $entityManager, $nom) : Response{
 
         $marque = $this->marqueRepository->findOneBy(['nom' => $nom]);
 
-        if (!$marque) {
-            throw $this->createNotFoundException('Le matériau n\'a pas été trouvé.');
+        if(!$marque){
+            throw $this->createNotFoundException('La marque n\'a pas été trouvé.');
         }
 
         // Supprimez l'élément de la base de données

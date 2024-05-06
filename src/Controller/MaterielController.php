@@ -106,7 +106,7 @@ class MaterielController extends AbstractController
         ]);
     }
 
-    #[Route('/deleteMateriel', name: 'app_form_materiel_delete')]
+    #[Route('/deleteMateriel{nom}', name: 'app_form_materiel_delete')]
     public function displayDeleteForm(EntityManagerInterface $entityManager, $nom) : Response{
 
         $materiaux = $this->materielRepository->findOneBy(['nom' => $nom]);

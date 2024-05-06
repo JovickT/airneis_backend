@@ -105,7 +105,7 @@ class CategorieController extends AbstractController
         ]);
     }
 
-    #[Route('/deleteCategorie', name: 'app_form_categorie_delete')]
+    #[Route('/deleteCategorie{nom}', name: 'app_form_categorie_delete')]
     public function displayDeleteForm(EntityManagerInterface $entityManager, $nom) : Response{
 
         $categorie = $this->categorieRepository->findOneBy(['nom' => $nom]);
