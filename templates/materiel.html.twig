@@ -1,14 +1,5 @@
+{% extends 'layout.html.twig' %}
 
-<h1 class="text-center mb-5">Liste Materiaux</h1>
-{% include 'partials/table.html.twig' with {'headers': tableHedears, 'rows': materiaux} %}
-<div class="user-plus" id="user-plus">
-    <button class='btn btn-primary' id="add">Ajouter un Matériel +</button>
-</div>
-<div class="add-user-form" id="add-user-form">
-    <img src={{asset('img/close.png')}} alt="close" class="close" id="close">
-    {% include 'forms/form-add-user.html.twig' %}
-</div>
-
-<script>
-
-</script>
+{% block content %}
+    {% include 'partials/table.html.twig' with {'headers': tableHedears, 'rows': materiaux} %}
+{% endblock %}

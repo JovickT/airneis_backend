@@ -1,36 +1,5 @@
-<h1 class="text-center mb-5">Liste Clients</h1>
-{% include 'partials/table.html.twig' with {'headers': tableHedears, 'rows': users} %}
-<div class="user-plus" id="user-plus">
-    <button class='btn btn-primary' id="add">Ajouter Utilisateur +</button>
-</div>
-<div class="add-user-form" id="add-user-form">
-    <img src={{asset('img/close.png')}} alt="close" class="close" id="close">
-    {% include 'forms/form-add-user.html.twig' %}
-</div>
+{% extends 'layout.html.twig' %}
 
-<script>
-    let close = document.getElementById("close");
-    let add = document.getElementById("add-user-form");
-    let addButton = document.getElementById("add");
-
-    addButton.addEventListener('click', () => {
-        console.log('test');
-        add.style.display = 'block';
-    });
-
-    close.addEventListener('click', () => {
-        console.log('test');
-        add.style.display = 'none';
-    });
-
-    function toggleAllCheckboxes() {
-        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(function(checkbox) {
-            checkbox.checked = document.getElementById('all').checked;
-        });
-    }
-
-    function toggleTri(column){
-        console.log('toggleTri:',column);
-    }
-</script>
+{% block content %}
+    {% include 'partials/table.html.twig' with {'headers': tableHedears, 'rows': users} %}
+{% endblock %}

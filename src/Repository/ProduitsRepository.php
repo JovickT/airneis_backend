@@ -83,4 +83,16 @@ class ProduitsRepository extends ServiceEntityRepository
 
         return $produitsArray;
     }
+
+    public function getAllCategories(): array
+    {
+        $noms = $this->createQueryBuilder('c')
+            ->select('c.nom')
+            ->getQuery()
+            ->getResult();
+
+        $nomList = array_column($noms, 'nom');
+
+        return $nomList;
+    }
 }
