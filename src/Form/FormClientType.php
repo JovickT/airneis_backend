@@ -14,14 +14,30 @@ class FormClientType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('prenom')
-            ->add('nom')
-            ->add('email')
+            ->add('prenom', null, [
+                'attr' => [
+                    'name' => 'prenom',
+                ],
+            ])
+            ->add('nom', null, [
+                'attr' => [
+                    'name' => 'nom',
+                ],
+            ])
+            ->add('email', null, [
+                'attr' => [
+                    'name' => 'email',
+                ],
+            ])
             ->add('mot_de_passe', PasswordType::class)
             ->add('telephone', null, [
-                'required' => false,
+                'required' => false
             ])
-            ->add('role')
+            ->add('role', null, [
+                'attr' => [
+                    'name' => 'role',
+                ],
+            ])
             ->add('adresse', FormAdresseType::class)
             ->add('save', SubmitType::class, ['label' => 'Ajouter'])
         ;

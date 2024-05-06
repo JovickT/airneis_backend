@@ -31,7 +31,7 @@
                         <div class="row justify-content-between text-left">
                             <div class="form-group col-sm-6 flex-column d-flex"> 
                                 <label class="form-control-label px-3">{{ form_label(form.email) }}<span class="text-danger"> *</span></label> 
-                                {{ form_widget(form.email, { 'attr': {'class': 'form-control', 'placeholder': '', 'name': 'email'} }) }}
+                                {{ form_widget(form.email, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
                             </div>
                             <div class="form-group col-sm-6 flex-column d-flex"> 
                                 <label class="form-control-label px-3">{{ form_label(form.telephone) }}</label> 
@@ -82,6 +82,27 @@
                             <button type="submit" class="btn-block btn-primary">Ajouter</button> 
                         </div>
                     </div>
+                  {# {% if app.request.method == 'POST' %}
+                    <p>
+                        {% for key, value in app.request.request.all %}
+                            <strong>{{ key }}</strong>: 
+                            {% if value is iterable %}
+                                {% for subItem in value %}
+                                    {% if subItem is iterable %}
+                                        {% for subSubItem in subItem %}
+                                            {{ subSubItem }}{% if not loop.last %}, {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        {{ subItem }}
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                {{ value }}
+                            {% endif %}
+                            <br>
+                        {% endfor %}
+                    </p>
+                {% endif %} #}
                 </form>
             </div>
         </div>

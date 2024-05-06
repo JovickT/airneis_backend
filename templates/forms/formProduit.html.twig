@@ -9,15 +9,15 @@
             <div class="card">
                 <h5 class="text-center my-4">Formulaire de Produit</h5>
                 <form class="form-card p-3" method="post">
-                    {% block form_fields %}
+                   {% block form_fields %}
                         <div class="row justify-content-between text-left">
-                            <div class="form-group col-sm-6 flex-column d-flex"> 
-                                <label class="form-control-label px-3">{{ form_label(form.reference) }}<span class="text-danger"> *</span></label> 
-                                {{ form_widget(form.reference, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
-                            </div>
                             <div class="form-group col-sm-6 flex-column d-flex"> 
                                 <label class="form-control-label px-3">{{ form_label(form.nom) }}<span class="text-danger"> *</span></label> 
                                 {{ form_widget(form.nom, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
+                            </div>
+                            <div class="form-group col-sm-6 flex-column d-flex"> 
+                                <label class="form-control-label px-3">{{ form_label(form.reference) }}<span class="text-danger"> *</span></label> 
+                                {{ form_widget(form.reference, { 'attr': {'class': 'form-control', 'placeholder': '' }}) }}
                             </div>
                         </div>
                         <div class="row justify-content-between text-left">
@@ -30,13 +30,12 @@
                                 {{ form_widget(form.description, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
                             </div>
                         </div>
-
                         <div class="row justify-content-between text-left">
                             <div class="form-group col-sm-6 flex-column d-flex"> 
                                 <label class="form-control-label px-3">{{ form_label(form.quantite) }}<span class="text-danger"> *</span></label> 
                                 {{ form_widget(form.quantite, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
                             </div>
-                             <div class="form-group col-sm-6 flex-column d-flex"> 
+                            <div class="form-group col-sm-6 flex-column d-flex"> 
                                 <label class="form-control-label px-3">{{ form_label(form.date_creation) }}<span class="text-danger"> *</span></label> 
                                 {{ form_widget(form.date_creation, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
                             </div>
@@ -48,11 +47,11 @@
                             </div>
                             <div class="form-group col-sm-6 flex-column d-flex"> 
                                 <label class="form-control-label px-3">{{ form_label(form.categorie) }}<span class="text-danger"> *</span></label> 
-                                {{ form_widget(form.categorie, { 'attr': {'class': 'form-control'} }) }}
+                               {{ form_widget(form.categorie, { 'attr': {'class': 'form-control'}}) }}
                             </div>
                         </div>
-                
                     {% endblock %}
+
                     <div class="row justify-content-end">
                         <div class="form-group col-sm-6"> 
                             <button type="submit" class="btn-block btn-primary">Ajouter</button> 
@@ -64,4 +63,32 @@
     </div>
 </div>
 
+{% block javascripts %}
+   <!-- Ajoutez cette balise <script> juste avant la fermeture de la balise </body> -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sélectionnez l'élément de catégorie
+        var categorieSelect = document.getElementById('form_produit_categorie');
+        // Ajoutez un écouteur d'événement pour détecter le changement de catégorie
+        categorieSelect.addEventListener('change', function() {
+            // Récupérez l'option sélectionnée de la catégorie
+            console.log('options:',this.options,'\nselectedIndex:', this.selectedIndex,'\nselectedOption:',this.options[this.selectedIndex]);
+            var selectedOption = this.options[this.selectedIndex];
+            // Récupérez la valeur de l'attribut "value" de l'option sélectionnée
+            var categorieValue = selectedOption.innerText;
+
+            // Générez la référence en fonction de la catégorie
+            var reference = categorieValue.substring(0, 3).toUpperCase() + Math.floor(Math.random() * 10000);
+
+            // Sélectionnez l'élément d'entrée de référence et mettez à jour sa valeur
+            var referenceInput = document.getElementById('form_produit_reference');
+            referenceInput.value = reference;
+        });
+    });
+</script>
+
 {% endblock %}
+
+{% endblock %}
+
+

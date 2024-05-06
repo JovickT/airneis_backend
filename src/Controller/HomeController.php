@@ -42,11 +42,9 @@ class HomeController extends AbstractController
             $emails = $this->clientRepository->getAllEmails();
 
             // Vérifier si l'e-mail saisi dans le formulaire existe déjà
-            if (in_array($_POST['email'], $emails)) {
-                return $this->addFlash('error', 'Utilisateur déjà existant.');
-            }
-            // Vérifier l'égalité des mots de passe
-            if ($motDePasse !== $verifMotDePasse) {
+            if (in_array($_POST['form_client']['email'], $emails)) {
+                $this->addFlash('error', 'Utilisateur déjà existant.');
+            } else if ($motDePasse !== $verifMotDePasse) {// Vérifier l'égalité des mots de passe
                 $this->addFlash('error', 'Les mots de passe ne correspondent pas.');
             } else {
                 // Hacher le mot de passe
@@ -61,7 +59,7 @@ class HomeController extends AbstractController
 
                 // Rediriger l'utilisateur ou afficher un message de succès
                 // Par exemple, rediriger vers une autre page
-                return $this->redirectToRoute('app_form_client_success');
+                return $this->redirectToRoute('app_users');
             }
         }
 

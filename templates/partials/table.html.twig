@@ -1,4 +1,5 @@
 
+{% include 'partials/modal.html.twig' %}
 <div class="card shadow mb-4">
     <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">{{ title }}</h6>
@@ -15,6 +16,8 @@
                     <a href="{{ path('app_form_marque') }}"><button class="btn btn-primary">Ajouter une marque</button></a>
                 {% elseif app.request.attributes.get('_route') == 'app_materiel' %}
                     <a href="{{ path('app_form_materiel') }}"><button class="btn btn-primary">Ajouter un materiaux</button></a>
+                {% elseif app.request.attributes.get('_route') == 'app_categorie' %}
+                    <a href="{{ path('app_form_categorie') }}"><button class="btn btn-primary">Ajouter une catégorie</button></a>
                 {% else %}
                     <a href="{{ path('app_dashbord') }}"><button class="btn btn-primary">Dashbord</button></a>
                 {% endif %}
@@ -46,8 +49,44 @@
                             {% for data in row %}
                                 <td>{{ data }}</td>
                             {% endfor %}
-                            <td><button class="btn btn-primary" id="modifier-{{ loop.index }}">MODIFIER</button></td>
-                            <td><button class="btn btn-danger" id="supprimer-{{ loop.index }}">Supprimer</button></td>
+                                {% if app.request.attributes.get('_route') == 'app_users' %}
+                                    <td><a href="{{ path('app_form_users_upd', {'email': row["email"]}) }}" class="btn btn-primary" >MODIFIER</button></a>
+                                    <td>
+                                        <form id="deleteForm{{ loop.index }}" action="{{ path('app_form_users_delete', { 'nom': row["nom"] }) }}" method="post">
+                                            <button type="submit" class="btn btn-danger">Supprimer</button>
+                                        </form>
+                                    </td>
+                                {% elseif app.request.attributes.get('_route') == 'app_produit' %}
+                                    <td><a href="{{ path('app_form_produit_upd', {'nom': row["nom"]}) }}" class="btn btn-primary" >MODIFIER</button></a>
+                                    <td>
+                                        <form id="deleteForm{{ loop.index }}" action="{{ path('app_form_produit_delete', { 'nom': row["nom"] }) }}" method="post">
+                                            <button type="submit" class="btn btn-danger">Supprimer</button>
+                                        </form>
+                                    </td>
+                                {% elseif app.request.attributes.get('_route') == 'app_marque' %}
+                                    <td><a href="{{ path('app_form_marque_upd', {'nom': row["nom"]}) }}" class="btn btn-primary" >MODIFIER</button></a>
+                                    <td>
+                                        <form id="deleteForm{{ loop.index }}" action="{{ path('app_form_marque_delete', { 'nom': row["nom"] }) }}" method="post">
+                                            <button type="submit" class="btn btn-danger">Supprimer</button>
+                                        </form>
+                                    </td>
+                                {% elseif app.request.attributes.get('_route') == 'app_materiel' %}
+                                    <td><a href="{{ path('app_form_materiel_upd', {'nom': row["nom"]}) }}" class="btn btn-primary" >MODIFIER</button></a>
+                                    <td>
+                                        <form id="deleteForm{{ loop.index }}" action="{{ path('app_form_materiel_delete', { 'nom': row["nom"] }) }}" method="post">
+                                            <button type="submit" class="btn btn-danger">Supprimer</button>
+                                        </form>
+                                    </td>
+                                {% elseif app.request.attributes.get('_route') == 'app_categorie' %}
+                                    <td><a href="{{ path('app_form_categorie_upd', {'nom': row["nom"]}) }}" class="btn btn-primary" >MODIFIER</button></a>
+                                    <td>
+                                        <form id="deleteForm{{ loop.index }}" action="{{ path('app_form_categorie_delete', { 'nom': row["nom"] }) }}" method="post">
+                                            <button type="submit" class="btn btn-danger">Supprimer</button>
+                                        </form>
+                                    </td>
+                                {% else %}
+                                    <td><a href="{{ path('app_dashbord') }}"><button class="btn btn-primary">Dashbord</button></a><td>
+                                {% endif %}
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -56,3 +95,21 @@
     </div>
 </div>
 
+{% block javascripts %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('[id^=deleteForm]').submit(function(event) {
+                event.preventDefault();
+                var nom = $(this).attr('id').replace('deleteForm', '');
+                $('#deleteNomInput').val(nom);
+                $('#confirmDeleteModal').modal('show');
+            });
+
+            $('#confirmDeleteForm').submit(function() {
+                // Vous pouvez également ajouter d'autres traitements ici avant l'envoi du formulaire
+                $(this).unbind('submit').submit();
+            });
+        });
+    </script>
+{% endblock %}
