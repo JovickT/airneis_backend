@@ -113,7 +113,7 @@ class ProduitController extends AbstractController
         ]);
     }
 
-    #[Route('/deleteProduit', name: 'app_form_produit_delete')]
+    #[Route('/deleteProduit{nom}', name: 'app_form_produit_delete')]
     public function displayDeleteForm(EntityManagerInterface $entityManager, $nom) : Response{
 
         $produit = $this->produitRepository->findOneBy(['nom' => $nom]);

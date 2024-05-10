@@ -78,7 +78,7 @@ class UsersController extends AbstractController
         ]);
     }
 
-    #[Route('/deleteUsers', name: 'app_form_users_delete')]
+    #[Route('/deleteUsers{email}', name: 'app_form_users_delete')]
     public function displayDeleteForm(EntityManagerInterface $entityManager, $email) : Response{
 
         $users = $this->clientRepository->findOneBy(['email' => $email]);
@@ -91,7 +91,7 @@ class UsersController extends AbstractController
         $entityManager->remove($users);
         $entityManager->flush();
     
-        return $this->redirectToRoute('app_marque');
+        return $this->redirectToRoute('app_users');
     }
 
 }
