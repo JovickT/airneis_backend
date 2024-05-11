@@ -112,14 +112,14 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getIdAdresse(): ?int
+    public function getAdresse(): ?Adresses
     {
-        return $this->id_adresse;
+        return $this->adresse;
     }
 
-    public function setIdAdresse(?int $id_adresse): static
+    public function setAdresse(?Adresses $adresse): self
     {
-        $this->id_adresse = $id_adresse;
+        $this->adresse = $adresse;
 
         return $this;
     }

@@ -73,8 +73,8 @@ CREATE TABLE `client` (
   `nom` varchar(40) NOT NULL,
   `email` varchar(80) NOT NULL,
   `mot_de_passe` varchar(40) NOT NULL,
-  `telephone` varchar(15) NOT NULL,
-  `id_adresse` int(11) NOT NULL
+  `telephone` varchar(15) NULL,
+  `id_adresse` int(11) NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
