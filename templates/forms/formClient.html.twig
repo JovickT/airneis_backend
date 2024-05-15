@@ -13,7 +13,7 @@
 <div class="container-fluid px-1 py-5 mx-auto">
     <div class="row d-flex justify-content-center">
         <div class="col-xl-7 col-lg-8 col-md-9 col-11 text-center">
-            <h3 class="mb-3">Nouvelle utilisateur</h3>
+            <h3 class="mb-3">{{ title }}</h3>
             <div class="card">
                 <h5 class="text-center my-4">Formulaire de Client</h5>
                 <form class="form-card p-3" method="post">
@@ -38,17 +38,19 @@
                                 {{ form_widget(form.telephone, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
                             </div>
                         </div>
-
-                        <div class="row justify-content-between text-left">
-                            <div class="form-group col-sm-6 flex-column d-flex"> 
-                                <label class="form-control-label px-3">{{ form_label(form.mot_de_passe) }}<span class="text-danger"> *</span></label> 
-                                {{ form_widget(form.mot_de_passe, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
+                        
+                       {% if title == "Nouvelle Utilisateur" %}
+                            <div class="row justify-content-between text-left">
+                                <div class="form-group col-sm-6 flex-column d-flex"> 
+                                    <label class="form-control-label px-3">{{ form_label(form.mot_de_passe) }}<span class="text-danger"> *</span></label> 
+                                    {{ form_widget(form.mot_de_passe, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
+                                </div>
+                                <div class="form-group col-sm-6 flex-column d-flex"> 
+                                    <label class="form-control-label px-3">vérification mot de passe<span class="text-danger"> *</span></label> 
+                                    <input type="password" class="form-control mt-2" name="verif_mdp"/>
+                                </div>
                             </div>
-                            <div class="form-group col-sm-6 flex-column d-flex"> 
-                                <label class="form-control-label px-3">vérification mot de passe<span class="text-danger"> *</span></label> 
-                                <input type="password" class="form-control mt-2" name="verif_mdp"/>
-                            </div>
-                        </div>
+                        {% endif %}
 
                         <div class="row justify-content-between text-left">
                             <div class="form-group col-sm-6 flex-column d-flex"> 
@@ -70,11 +72,9 @@
                                 {{ form_widget(form.adresse.pays, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
                             </div>
                         </div>
-
-
-                        <div class="form-group col-sm-6 d-flex"> 
-                            <label class="form-control-label d-flex">{{ form_label(form.role) }}<span class="text-danger"> *</span></label> 
-                            {{ form_widget(form.role, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
+                        <div class="form-group col-sm-6 d-flex flex-column"> 
+                            <label class="form-control-label d-flex">{{ form_label(form.roles) }}<span class="text-danger"> *</span></label> 
+                            {{ form_widget(form.roles, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
                         </div>
                     {% endblock %}
                     <div class="row justify-content-end">
