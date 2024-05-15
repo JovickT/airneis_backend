@@ -36,7 +36,7 @@ class HomeController extends AbstractController
         if ($_POST) {
             // Récupérer les données du formulaire
             $client = $form->getData();
-            $motDePasse = $client->getMotDePasse();
+            $motDePasse = $client->getPassword();
             $verifMotDePasse = $request->request->get('verif_mdp');
 
             $emails = $this->clientRepository->getAllEmails();
@@ -51,7 +51,7 @@ class HomeController extends AbstractController
                 $mdpHash = password_hash($motDePasse, PASSWORD_DEFAULT);
 
                 // Enregistrer le mot de passe haché
-                $client->setMotDePasse($mdpHash);
+                $client->setPassword($mdpHash);
 
                 // Enregistrer le client dans la base de données
                 $this->entityManager->persist($client);

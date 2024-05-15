@@ -25,6 +25,8 @@ class ApiController extends AbstractController
         // Logique pour récupérer les données et les renvoyer
         $data['produit'] =  $this->produitRepository->getProduits();  // Données à renvoyer
         $data['categorie'] =  $this->categorieRepository->getCategories();  // Données à renvoyer
-        return $this->json($data);
+        return $this->json($data , 200, [
+            'Access-Control-Allow-Origin' => '*'
+        ]);
     }
 }
