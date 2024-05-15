@@ -31,7 +31,7 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
      * @var list<string> The user roles
      */
     #[ORM\Column]
-    private array $roles = [];
+    private ?array $roles = null;
 
     /**
      * @var string The hashed password
@@ -42,8 +42,9 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 15)]
     private ?string $telephone = null;
 
-    #[ORM\Column]
-    private ?int $id_adresse = null;
+    #[ORM\ManyToOne(targetEntity: Adresses::class, cascade: ["persist"])]
+    #[ORM\JoinColumn(name: "id_adresse", referencedColumnName: "id_adresse")]
+    private $adresse;
 
 
    
@@ -135,10 +136,7 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
-
+        $roles = $this->roles ?? [];
         return array_unique($roles);
     }
 

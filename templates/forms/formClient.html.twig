@@ -41,8 +41,8 @@
 
                         <div class="row justify-content-between text-left">
                             <div class="form-group col-sm-6 flex-column d-flex"> 
-                                <label class="form-control-label px-3">{{ form_label(form.mot_de_passe) }}<span class="text-danger"> *</span></label> 
-                                {{ form_widget(form.mot_de_passe, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
+                                <label class="form-control-label px-3">{{ form_label(form.plainPassword) }}<span class="text-danger"> *</span></label> 
+                                {{ form_widget(form.plainPassword, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
                             </div>
                             <div class="form-group col-sm-6 flex-column d-flex"> 
                                 <label class="form-control-label px-3">vérification mot de passe<span class="text-danger"> *</span></label> 
@@ -73,8 +73,8 @@
 
 
                         <div class="form-group col-sm-6 d-flex"> 
-                            <label class="form-control-label d-flex">{{ form_label(form.role) }}<span class="text-danger"> *</span></label> 
-                            {{ form_widget(form.role, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
+                            <label class="form-control-label d-flex">{{ form_label(form.roles) }}<span class="text-danger"> *</span></label> 
+                            {{ form_widget(form.roles, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
                         </div>
                     {% endblock %}
                     <div class="row justify-content-end">
