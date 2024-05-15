@@ -4,9 +4,13 @@ namespace App\Entity;
 
 use App\Repository\ClientRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
-class Client
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
+class Client implements UserInterface, PasswordAuthenticatedUserInterface
 {
 
     #[ORM\Id]
@@ -23,18 +27,25 @@ class Client
     #[ORM\Column(length: 80, unique: true)]
     private ?string $email = null;
 
-    #[ORM\Column(length: 40)]
+    /**
+     * @var list<string> The user roles
+     */
+    #[ORM\Column]
+    private ?array $roles = null;
+
+    /**
+     * @var string The hashed password
+     */
+    #[ORM\Column]
     private ?string $mot_de_passe = null;
 
     #[ORM\Column(length: 15)]
     private ?string $telephone = null;
 
-    #[ORM\ManyToOne(targetEntity: Adresses::class)]
+    #[ORM\ManyToOne(targetEntity: Adresses::class, cascade: ["persist"])]
     #[ORM\JoinColumn(name: "id_adresse", referencedColumnName: "id_adresse")]
     private $adresse;
 
-    #[ORM\Column]
-    private ?int $role = null;
 
    
     public function getIdClient(): ?int
@@ -78,12 +89,12 @@ class Client
         return $this;
     }
 
-    public function getMotDePasse(): ?string
+    public function getPassword(): ?string
     {
         return $this->mot_de_passe;
     }
 
-    public function setMotDePasse(string $mot_de_passe): static
+    public function setPassword(string $mot_de_passe): static
     {
         $this->mot_de_passe = $mot_de_passe;
 
@@ -114,16 +125,41 @@ class Client
         return $this;
     }
 
-    public function getRole(): ?int
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials(): void
     {
-        return $this->role;
+        // Effacer les informations sensibles (comme le mot de passe)
+        //$this->password = null;
     }
 
-    public function setRole(?int $role): static
+    public function getRoles(): array
     {
-        $this->role = $role;
+        $roles = $this->roles ?? [];
+        // guarantee every user at least has ROLE_USER
+
+        return array_unique($roles);
+    }
+
+    /**
+     * @param list<string> $roles
+     */
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
 
         return $this;
+    }
+
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
     }
     
 }

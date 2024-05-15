@@ -73,8 +73,8 @@ CREATE TABLE `client` (
   `nom` varchar(40) NOT NULL,
   `email` varchar(80) NOT NULL,
   `mot_de_passe` varchar(40) NOT NULL,
-  `telephone` varchar(15) NOT NULL,
-  `id_adresse` int(11) NOT NULL
+  `telephone` varchar(15) NULL,
+  `id_adresse` int(11) NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -531,6 +531,8 @@ ALTER TABLE `produit_panier`
   ADD CONSTRAINT `produit_panier_ibfk_1` FOREIGN KEY (`id_produit`) REFERENCES `produits` (`id_produit`) ON DELETE NO ACTION ON UPDATE CASCADE,
   ADD CONSTRAINT `produit_panier_ibfk_2` FOREIGN KEY (`id_panier`) REFERENCES `panier` (`id_panier`) ON DELETE NO ACTION ON UPDATE CASCADE;
 COMMIT;
+
+ALTER TABLE airneis.client CHANGE COLUMN role roles JSON;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

@@ -1,7 +1,5 @@
-<div>
-    <h1 class="text-center" >Catégorie</h1>
+{% extends 'layout.html.twig' %}
+
+{% block content %}
     {% include 'partials/table.html.twig' with {'headers': tableHedears, 'rows': categories} %}
-    <div class="text-end user-plus">
-        <button class="btn btn-primary">Ajouter une catégorie +</button>
-    </div>
-</div>
+{% endblock %} 

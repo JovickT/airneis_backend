@@ -40,6 +40,7 @@ class Produits
     #[ORM\JoinColumn(name: "categorie", referencedColumnName: "id_categorie")]
     private $categorie;
 
+
     public function getId(): ?int
     {
         return $this->id_produit;
