@@ -9,8 +9,6 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Length;
 
 class FormClientType extends AbstractType
 {
@@ -32,7 +30,7 @@ class FormClientType extends AbstractType
                     'name' => 'email',
                 ],
             ])
-            ->add('plainPassword', PasswordType::class, [
+            ->add('mot_de_passe', PasswordType::class, [
                 // instead of being set onto the object directly,
                 // this is read and encoded in the controller
                 'mapped' => false,
@@ -56,10 +54,19 @@ class FormClientType extends AbstractType
                 'choices' => [
                     'ROLE_USER' => 'ROLE_USER',
                     'ROLE_ADMIN' => 'ROLE_ADMIN',
+                    // Ajoutez d'autres choix au besoin
+                ],
+                'multiple' => true,
+                'expanded' => false, // Définissez à true si vous voulez une sélection multiple
+                'attr' => [
+                    'class' => 'form-control', // Ajoutez des classes CSS personnalisées au besoin
+                    // Autres attributs HTML personnalisés
                 ],
                 'multiple' => true,
                 'expanded' => true,
             ])
+            ->add('adresse', FormAdresseType::class)
+            ->add('save', SubmitType::class, ['label' => 'Ajouter'])
             ->add('adresse', FormAdresseType::class)
             ->add('save', SubmitType::class, ['label' => 'Ajouter'])
         ;

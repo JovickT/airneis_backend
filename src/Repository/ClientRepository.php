@@ -61,9 +61,9 @@ class ClientRepository extends ServiceEntityRepository
                 $userData['telephone'] = $user->getTelephone();
                 $role = $user->getRoles();
                 if($role){
-                    $userData['role'] = 'Admin';
+                    $userData['role'] = implode($role);
                 }else{
-                    $userData['role'] = 'Client';
+                    $userData['role'] = '';
                 }
                 $adresse = $user->getAdresse();
                 if ($adresse) {
