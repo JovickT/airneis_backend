@@ -95,4 +95,24 @@ class ProduitsRepository extends ServiceEntityRepository
 
         return $nomList;
     }
+
+    public function findProductsByCategoryName(string $categoryName): array
+    {
+        return $this->createQueryBuilder('p')
+            ->innerJoin('p.categorie', 'c')
+            ->where('c.nom = :categoryName')
+            ->setParameter('categoryName', $categoryName)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findProductsByName(string $produitName): array
+    {
+
+        return $this->createQueryBuilder('p')
+        ->where('p.nom = :produitName')
+        ->setParameter('produitName', $produitName)
+        ->getQuery()
+        ->getResult();
+    }
 }

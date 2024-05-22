@@ -7,6 +7,14 @@ controllers:
 api_login_check:
     path: /api/login_check
 frontend_data:
-    path: /api/data
+    path: /data
     controller: App\Controller\ApiController::fetchData
     methods: [GET, POST, DELETE]
+ProductOfCategorie_data:
+    path: /categories
+    controller: App\Controller\ApiController::ProductOfCategorie
+    methods: [GET]
+Product_data:
+    path: /produits
+    controller: App\Controller\ApiController::ProductData
+    methods: [GET]
