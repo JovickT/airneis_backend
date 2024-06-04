@@ -61,7 +61,7 @@ class UsersController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($_POST) {
+        if ($form->isSubmitted() && $form->isValid()) {
             // Pas besoin de récupérer $_POST, Symfony gère cela pour vous via le formulaire
     
             // Flush l'EntityManager pour mettre à jour les modifications dans la base de données

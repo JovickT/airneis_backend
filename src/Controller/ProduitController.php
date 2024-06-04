@@ -2,9 +2,15 @@
 
 namespace App\Controller;
 
+use App\Entity\Image;
+use App\Entity\ImageProduit;
 use App\Entity\Produits;
+use App\Form\FormImageProduitType;
+use App\Form\FormImageType;
 use App\Form\FormProduitType;
 use App\Repository\CategoriesRepository;
+use App\Repository\ImageProduitRepository;
+use App\Repository\ImageRepository;
 use App\Repository\ProduitsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,10 +22,15 @@ class ProduitController extends AbstractController
 {
     private $produitRepository;
     private $categorieRepository;
+    private $imageProduitRepository;
+    private $imageRepository;
 
-    public function __construct(private EntityManagerInterface $entityManager, ProduitsRepository $produitRepository,CategoriesRepository $categorieRepository) {
+    public function __construct(private EntityManagerInterface $entityManager, ProduitsRepository $produitRepository,
+    CategoriesRepository $categorieRepository, ImageProduitRepository $imageProduitRepository, ImageRepository $imageRepository) {
         $this->produitRepository = $produitRepository;
         $this->categorieRepository = $categorieRepository;
+        $this->imageProduitRepository = $imageProduitRepository;
+        $this->imageRepository = $imageRepository;
     }
 
     #[Route('/produit', name: 'app_produit')]
@@ -127,5 +138,50 @@ class ProduitController extends AbstractController
         $entityManager->flush();
     
         return $this->redirectToRoute('app_produit');
+    }
+
+    #[Route('/linkImage', name: 'app_form_image_upd')]
+    public function linkImage(Request $request) : Response{
+    
+        $imageProduit = new ImageProduit();
+        $lien = $request->query->get('lien');
+
+        // Récupérer l'objet Materiaux correspondant depuis la base de données
+        $image = $this->imageRepository->findOneBy(['lien' => $lien]);
+
+        if (!$image) {
+            throw $this->createNotFoundException('L\'image n\'a pas été trouvé.');
+        }
+       
+        // Créer le formulaire et le remplir avec les données du matériau
+        $form = $this->createForm(FormImageProduitType::class, $imageProduit);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $imageProduitData = $form->getData();
+            
+            // Récupérez les entités associées
+            $image = $imageProduitData->getIdImage();
+            $produit = $imageProduitData->getIdProduit();
+            
+            $imageProduit->setIdImage($image);
+            $imageProduit->setIdProduit($produit);
+
+            // dd($test,$test1);
+
+            // // Persist the ImageProduit entity
+            $this->entityManager->persist($imageProduit);
+            $this->entityManager->flush();
+
+            $this->addFlash('success', 'opération réalisé avec succès');
+        }
+
+        return $this->render('forms/formImageProduit.html.twig', [
+            'controller_name' => 'formClientController',
+            'title' => 'Lier une Image à un Produit',
+            'form' => $form->createView(),
+        ]);
+     
     }
 }

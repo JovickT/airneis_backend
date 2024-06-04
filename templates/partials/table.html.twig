@@ -18,6 +18,8 @@
                     <a href="{{ path('app_form_materiel') }}"><button class="btn btn-primary">Ajouter un materiaux</button></a>
                 {% elseif app.request.attributes.get('_route') == 'app_categorie' %}
                     <a href="{{ path('app_form_categorie') }}"><button class="btn btn-primary">Ajouter une catégorie</button></a>
+                {% elseif app.request.attributes.get('_route') == 'app_image' %}
+                    <a href="{{ path('image_upload') }}"><button class="btn btn-primary">Ajouter une image</button></a>
                 {% else %}
                     <a href="{{ path('app_dashbord') }}"><button class="btn btn-primary">Dashbord</button></a>
                 {% endif %}
@@ -46,8 +48,14 @@
                 <tbody>
                     {% for row in rows %}
                         <tr>
-                            {% for data in row %}
-                                <td>{{ data }}</td>
+                            {% for key, data in row %}
+                                <td>
+                                    {% if key == 'display' %}
+                                        {{ data|raw }}
+                                    {% else %}
+                                        {{ data }}
+                                    {% endif %}
+                                </td>
                             {% endfor %}
                                 {% if app.request.attributes.get('_route') == 'app_users' %}
                                     <td><a href="{{ path('app_form_users_upd', {'email': row["email"]}) }}" class="btn btn-primary" >MODIFIER</button></a>
@@ -81,6 +89,13 @@
                                     <td><a href="{{ path('app_form_categorie_upd', {'nom': row["nom"]}) }}" class="btn btn-primary" >MODIFIER</button></a>
                                     <td>
                                         <form id="deleteForm{{ loop.index }}" action="{{ path('app_form_categorie_delete', { 'nom': row["nom"] }) }}" method="post">
+                                            <button type="submit" class="btn btn-danger">Supprimer</button>
+                                        </form>
+                                    </td>
+                                  {% elseif app.request.attributes.get('_route') == 'app_image' %}
+                                    <td><a href="{{ path('app_form_image_upd', {'lien': row["lien"]}) }}" class="btn btn-primary" >MODIFIER</button></a>
+                                    <td>
+                                        <form id="deleteForm{{ loop.index }}" action="" method="post">
                                             <button type="submit" class="btn btn-danger">Supprimer</button>
                                         </form>
                                     </td>

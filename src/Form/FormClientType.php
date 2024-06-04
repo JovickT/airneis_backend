@@ -6,14 +6,25 @@ use App\Entity\Client;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
+use App\Validator\Constraints\PasswordMatch;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+use App\Repository\ClientRepository;
 
 class FormClientType extends AbstractType
 {
+    private $clientRepository;
+
+    public function __construct(ClientRepository $clientRepository)
+    {
+        $this->clientRepository = $clientRepository;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -32,21 +43,19 @@ class FormClientType extends AbstractType
                     'name' => 'email',
                 ],
             ])
-            ->add('mot_de_passe', PasswordType::class, [
-                // instead of being set onto the object directly,
-                // this is read and encoded in the controller
-                'mapped' => false,
-                'attr' => ['autocomplete' => 'new-password'],
+            ->add('password', RepeatedType::class, [
+                'type' => PasswordType::class,
+                'invalid_message' => 'The password fields must match.',
+                'options' => ['attr' => ['class' => 'password-field']],
+                'required' => true,
+                'first_options'  => ['label' => 'Mot de Passe'],
+                'second_options' => ['label' => 'Vérification du Mot de Passe'],
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Please enter a password',
-                    ]),
-                    new Length([
-                        'min' => 6,
-                        'minMessage' => 'Your password should be at least {{ limit }} characters',
-                        // max length allowed by Symfony for security reasons
-                        'max' => 4096,
-                    ]),
+                    new Assert\NotBlank(['groups' => ['registration']]),
+                    new Assert\Callback([
+                        'callback' => [$this, 'validatePassword'],
+                        'groups' => ['registration']
+                    ])
                 ],
             ])
             ->add('telephone', null, [
@@ -67,8 +76,6 @@ class FormClientType extends AbstractType
             ])
             ->add('adresse', FormAdresseType::class)
             ->add('save', SubmitType::class, ['label' => 'Ajouter'])
-            ->add('adresse', FormAdresseType::class)
-            ->add('save', SubmitType::class, ['label' => 'Ajouter'])
         ;
     }
 
@@ -76,6 +83,23 @@ class FormClientType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Client::class,
+            'validation_groups' => function (FormInterface $form) {
+                $data = $form->getData();
+                return $data->getEmail() ? ['Default'] : ['Default', 'registration'];
+            }
         ]);
+    }
+
+    public function validatePassword($value, ExecutionContextInterface $context)
+    {
+        $form = $context->getRoot();
+        $client = $form->getData();
+
+        // Si l'utilisateur est en cours de modification et le champ de mot de passe est vide,
+        // récupérez le mot de passe actuel de l'utilisateur dans la base de données
+        if ($client->getEmail() && empty($value)) {
+            $oldClient = $this->clientRepository->find($client->getEmail());
+            $client->setPassword($oldClient->getPassword());
+        }
     }
 }
