@@ -11,14 +11,14 @@ class Image
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    private ?int $id_image = null;
 
     #[ORM\Column(length: 255)]
     private ?string $lien = null;
 
-    public function getId(): ?int
+    public function getIdImage(): ?int
     {
-        return $this->id;
+        return $this->id_image;
     }
 
     public function getLien(): ?string
@@ -32,4 +32,6 @@ class Image
 
         return $this;
     }
+
+    
 }

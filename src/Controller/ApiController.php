@@ -2,7 +2,12 @@
 
 namespace App\Controller;
 
+use App\Entity\ImageCarousel;
+use App\Repository\CarrouselRepository;
 use App\Repository\CategoriesRepository;
+use App\Repository\ImageCarouselRepository;
+use App\Repository\ImageProduitRepository;
+use App\Repository\ImageRepository;
 use App\Repository\ProduitsRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,10 +19,19 @@ class ApiController extends AbstractController
 {
     private $produitRepository;
     private $categorieRepository;
+    private $imageProduitRepository;
+    private $imageRepository;
+    private $carrouselRepository;
 
-    public function __construct(ProduitsRepository $produitRepository,CategoriesRepository $categorieRepository) {
+    public function __construct(ProduitsRepository $produitRepository,
+    CategoriesRepository $categorieRepository,ImageProduitRepository $imageProduitRepository,
+    ImageRepository $imageRepository, CarrouselRepository $carrouselRepository,
+     ) {
         $this->produitRepository = $produitRepository;
         $this->categorieRepository = $categorieRepository;
+        $this->imageProduitRepository = $imageProduitRepository;
+        $this->imageRepository = $imageRepository;
+        $this->carrouselRepository = $carrouselRepository;
     }
 
     #[Route('/data', name: 'frontend_data')]
@@ -62,6 +76,7 @@ class ApiController extends AbstractController
            // Récupérer les produits de la catégorie
            $data["theProduct"] = $this->produitRepository->findProductsByName($produits);
            $data["similary"] = $this->produitRepository->findProductsByCategoryName($categories);
+           $data["imagesSimilary"] = $this->imageProduitRepository->imagesProductsSimilary($categories,$produits);
 
            return $this->json($data, 200, [
                'Access-Control-Allow-Origin' => '*'
@@ -72,4 +87,84 @@ class ApiController extends AbstractController
             'Access-Control-Allow-Origin' => '*'
         ]);
     }
+
+    #[Route('/ip', name: 'image_product')]
+    public function imageofProduct(Request $request): JsonResponse
+    {
+      
+        $imageProduits = $this -> imageProduitRepository->findAll();
+
+       if ($imageProduits) {
+
+            $data = [];
+
+            foreach ($imageProduits as $imageProduit) {
+                $produitNom = $imageProduit->getIdProduit()->getNom();
+              $imageLien = $this->getParameter('app.url') . '/uploads/' . $imageProduit->getIdImage()->getLien();
+        
+                // Vérifier si le produit existe déjà dans le tableau data
+                if (!isset($data[$produitNom])) {
+                    $data[$produitNom] = [
+                        'produit' => $produitNom,
+                        'images' => []
+                    ];
+                }
+        
+                // Ajouter le lien de l'image au produit correspondant
+                $data[$produitNom]['images'][] = $imageLien;
+            }
+    
+        // Réindexer le tableau pour s'assurer qu'il est bien formaté en JSON
+            $data = array_values($data);
+            
+
+           return $this->json($data, 200, [
+               'Access-Control-Allow-Origin' => '*'
+           ]);
+       }
+
+        return $this->json(['error' => 'Category not specified'], 400, [
+            'Access-Control-Allow-Origin' => '*'
+        ]);
+    }
+
+    // #[Route('/carrousel', name: 'image_carrousel')]
+    // public function imagesCarrousel(Request $request): JsonResponse
+    // {
+
+     
+
+    //    if ($imageCarrousel) {
+
+    //         $data = [];
+
+    //         foreach ($imageProduits as $imageProduit) {
+    //             $produitNom = $imageProduit->getIdProduit()->getNom();
+    //           $imageLien = $this->getParameter('app.url') . '/uploads/' . $imageProduit->getIdImage()->getLien();
+        
+    //             // Vérifier si le produit existe déjà dans le tableau data
+    //             if (!isset($data[$produitNom])) {
+    //                 $data[$produitNom] = [
+    //                     'produit' => $produitNom,
+    //                     'images' => []
+    //                 ];
+    //             }
+        
+    //             // Ajouter le lien de l'image au produit correspondant
+    //             $data[$produitNom]['images'][] = $imageLien;
+    //         }
+    
+    //     // Réindexer le tableau pour s'assurer qu'il est bien formaté en JSON
+    //         $data = array_values($data);
+            
+
+    //        return $this->json($data, 200, [
+    //            'Access-Control-Allow-Origin' => '*'
+    //        ]);
+    //    }
+
+    //     return $this->json(['error' => 'Category not specified'], 400, [
+    //         'Access-Control-Allow-Origin' => '*'
+    //     ]);
+    // }
 }

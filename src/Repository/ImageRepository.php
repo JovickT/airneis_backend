@@ -40,4 +40,21 @@ class ImageRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    public function getImages(){
+        $images = $this->createQueryBuilder('c')
+        ->getQuery()
+        ->getResult();
+
+        $imagesArray = [];
+            foreach ($images as $image) {
+                $imageData = [];
+            
+                $imageData['lien'] = $image->getLien();
+        
+                $imagesArray[] = $imageData;
+            }
+
+            return $imagesArray;
+    }
 }

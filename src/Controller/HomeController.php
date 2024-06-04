@@ -3,10 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\Adresses;
+use App\Entity\Carrousel;
 use App\Entity\Client;
+use App\Entity\ImageCarousel;
 use App\Form\FormClientType;
 use App\Repository\AdressesRepository;
+use App\Repository\CarrouselRepository;
 use App\Repository\ClientRepository;
+use App\Repository\ImageCarouselRepository;
+use App\Repository\ImageRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,10 +25,23 @@ class HomeController extends AbstractController
 {
     private $clientRepository;
     private $adresseRepository;
+    private $imageRepository;
+    private $carrouselRepository;
+    // private $imageCarrouselRepository;
     
-    public function __construct(private EntityManagerInterface $entityManager, ClientRepository $clientRepository,AdressesRepository $adresseRepository) {
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+        ClientRepository $clientRepository,
+        AdressesRepository $adresseRepository,
+        ImageRepository $imageRepository,
+        CarrouselRepository $carrouselRepository,
+        // ImageCarouselRepository $imageCarrouselRepository,
+    ) {
         $this->clientRepository = $clientRepository;
         $this->adresseRepository = $adresseRepository;
+        $this->imageRepository = $imageRepository;
+        $this->carrouselRepository = $carrouselRepository;
+        // $this->imageCarrouselRepository = $imageCarrouselRepository;
     }
 
     #[Route('/dashbord', name: 'app_home')]
@@ -145,6 +163,53 @@ class HomeController extends AbstractController
         return $hashedPassword;
     }
 
+    #[Route('/displayCarrouselImages', name: 'app_displayCarrouselImages')]
+    public function displayCarrouselImages(Request $request) : Response{
+        $images = $this ->imageRepository->findAll();
+        $carrousels = $this ->carrouselRepository->findAll();
+        $tabCarrousels = [] ;
+        foreach ($carrousels as $key => $carrousel) {
+            $tabCarrousels[] = [
+                'page' => $carrousel->getPage(),
+                'quantite' => $carrousel->getQuantite()
+            ];
+        }
 
-    
+        // dd($tabCarrousels);
+        $tabImages = [] ;
+        foreach ($images as $key => $image) {
+            $tabImages[] = $image->getlien();
+        }
+
+        if($_GET){
+            
+            $pageGet = $request->query->get('page');
+            $imageGet = $request->query->get('image');
+            $rangGet = $request->query->get('rang');
+
+            $page = $this ->carrouselRepository->find(['page' => $pageGet]);
+            $image = $this ->imageRepository->find(['lien' => $imageGet]);
+
+            dd($page);
+            $imageCarrousel = new ImageCarousel();
+
+        
+            $imageCarrousel -> setCarrousel($page);
+            $imageCarrousel -> setImage($image);
+            $imageCarrousel -> setRang($rangGet);
+
+            $this->entityManager->persist($imageCarrousel);
+            $this->entityManager->flush();
+
+           
+        }
+
+        // $images = $this ->imageCarrouselRepository->findAll();
+        // dd($tabImages);
+        return $this->render('carrousel.html.twig', [
+            'controller_name' => 'formClientController',
+            'images' => $tabImages,
+            'carrousel' => $tabCarrousels
+        ]);
+    }
 }

@@ -1,0 +1,74 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+
+{% if form_errors(form) %}
+    <div class="alert alert-danger">
+        {{ form_errors(form) }}
+    </div>
+{% endif %}
+
+{# Afficher les messages flash #}
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ label }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<div class="container-fluid px-1 py-5 mx-auto">
+    <div class="row d-flex justify-content-center">
+        <div class="col-xl-7 col-lg-8 col-md-9 col-11 text-center">
+            <h3 class="mb-3">{{ title }}</h3>
+            <div class="card">
+                <h5 class="text-center my-4">Formulaire Image</h5>
+                <form class="form-card p-3" method="post" enctype="multipart/form-data">
+                    {% block form_fields %}
+                        <div class="row justify-content-between text-left">
+                            <div class="form-group col-sm-6 flex-column d-flex"> 
+                                <label class="form-control-label px-3">{{ form_label(form.id_image) }}<span class="text-danger"> *</span></label> 
+                                {{ form_widget(form.id_image, { 'attr': {'class': 'form-control'} }) }}
+                            </div>
+                            <div class="form-group col-sm-6 flex-column d-flex"> 
+                                <label class="form-control-label px-3">{{ form_label(form.id_produit) }}<span class="text-danger"> *</span></label> 
+                                {{ form_widget(form.id_produit, { 'attr': {'class': 'form-control'} }) }}
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column text-left mb-4">
+                            <label for="imagePreview" class="ml-4">Preview:</label>
+                            <img id="imagePreview" src="#" alt="Image preview" style="max-width: 300px; display: none;" />
+                        </div>
+                    {% endblock %}
+                    <div class="row justify-content-end">
+                        <div class="form-group col-sm-6"> 
+                            <button type="submit" class="btn-block btn-primary">Lier</button> 
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', (event) => {
+    const imageSelect = document.getElementById('{{ form.id_image.vars.id }}');
+    const imagePreview = document.getElementById('imagePreview');
+
+    imageSelect.addEventListener('change', function() {
+        const selectedOption = imageSelect.options[imageSelect.selectedIndex];
+        const imagePath = selectedOption.getAttribute('data-image-path');
+        
+        if (imagePath) {
+            imagePreview.src = '/uploads/' + imagePath;
+            imagePreview.style.display = 'block';
+        } else {
+            imagePreview.style.display = 'none';
+        }
+    });
+});
+</script>
+
+
+{% endblock %}

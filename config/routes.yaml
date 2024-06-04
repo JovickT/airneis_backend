@@ -18,3 +18,7 @@ Product_data:
     path: /produits
     controller: App\Controller\ApiController::ProductData
     methods: [GET]
+image_product:
+    path: /ip
+    controller: App\Controller\ApiController::imageofProduct
+    methods: [GET,POST]

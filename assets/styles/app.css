@@ -3,3 +3,10 @@
     position: relative;
     top: 28%;
 }
+
+.bordureCarrousel{
+    width: 250px;
+    height: 150px;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+}

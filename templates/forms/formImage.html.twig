@@ -1,0 +1,80 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+
+{% if form_errors(form) %}
+    <div class="alert alert-danger">
+        {{ form_errors(form) }}
+    </div>
+{% endif %}
+
+<div class="container-fluid px-1 py-5 mx-auto">
+    <div class="row d-flex justify-content-center">
+        <div class="col-xl-7 col-lg-8 col-md-9 col-11 text-center">
+            <h3 class="mb-3">{{ title }}</h3>
+            <div class="card">
+                <h5 class="text-center my-4">Formulaire Image</h5>
+                <form class="form-card p-3" method="post" enctype="multipart/form-data">
+                    {% block form_fields %}
+                        <div class="row justify-content-between text-left">
+                             <div class="form-group col-sm-6 flex-column d-flex"> 
+                                <label class="form-control-label px-3">{{ form_label(form.image) }}<span class="text-danger"> *</span></label> 
+                                {{ form_widget(form.image, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column text-left ml-2 mb-5">
+                            <label for="imagePreview">Preview:</label>
+                            <img id="imagePreview" src="" alt="Image preview" style="max-width: 300px; display: none;" />
+                        </div>
+                    {% endblock %}
+                    <div class="row justify-content-end">
+                        <div class="form-group col-sm-6"> 
+                            <button type="submit" class="btn-block btn-primary">Ajouter</button> 
+                        </div>
+                    </div>
+                     {# {% if app.request.method == 'POST' %}
+                    <p>
+                        {% for key, value in app.request.request.all %}
+                            <strong>{{ key }}</strong>: 
+                            {% if value is iterable %}
+                                {% for subItem in value %}
+                                    {% if subItem is iterable %}
+                                        {% for subSubItem in subItem %}
+                                            {{ subSubItem }}{% if not loop.last %}, {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        {{ subItem }}
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                {{ value }}
+                            {% endif %}
+                            <br>
+                        {% endfor %}
+                    </p>
+                {% endif %} #}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+  <script>
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const imagePreview = document.getElementById('imagePreview');
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+            }
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+
+    </script>
+
+{% endblock %}
