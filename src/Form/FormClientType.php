@@ -9,6 +9,8 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class FormClientType extends AbstractType
 {
@@ -61,9 +63,7 @@ class FormClientType extends AbstractType
                 'attr' => [
                     'class' => 'form-control', // Ajoutez des classes CSS personnalisées au besoin
                     // Autres attributs HTML personnalisés
-                ],
-                'multiple' => true,
-                'expanded' => true,
+                ]
             ])
             ->add('adresse', FormAdresseType::class)
             ->add('save', SubmitType::class, ['label' => 'Ajouter'])
