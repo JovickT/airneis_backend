@@ -22,3 +22,9 @@ image_product:
     path: /ip
     controller: App\Controller\ApiController::imageofProduct
     methods: [GET,POST]
+
+
+search_produits:
+    path: /search
+    controller: App\Controller\ApiController::searchProduits
+    methods: [GET]
