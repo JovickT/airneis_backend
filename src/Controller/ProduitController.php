@@ -26,7 +26,8 @@ class ProduitController extends AbstractController
     private $imageRepository;
 
     public function __construct(private EntityManagerInterface $entityManager, ProduitsRepository $produitRepository,
-    CategoriesRepository $categorieRepository, ImageProduitRepository $imageProduitRepository, ImageRepository $imageRepository) {
+    CategoriesRepository $categorieRepository, ImageProduitRepository $imageProduitRepository,
+    ImageRepository $imageRepository) {
         $this->produitRepository = $produitRepository;
         $this->categorieRepository = $categorieRepository;
         $this->imageProduitRepository = $imageProduitRepository;
