@@ -80,11 +80,30 @@ class ApiController extends AbstractController
 
        if ($produits) {
            // Récupérer les produits de la catégorie
-           $data["theProduct"] = $this->produitRepository->findProductsByName($produits);
-           $data["similary"] = $this->produitRepository->findProductsByCategoryName($categories);
-           $data["imagesSimilary"] = $this->imageProduitRepository->imagesProductsSimilary($categories,$produits);
+            $data["theProduct"] = $this->produitRepository->findProductsByName($produits);
+            $data["similary"] = $this->produitRepository->findProductsByCategoryName($categories);
+            $myArray["theProduct"] = $data["theProduct"];
+           
+           foreach ($data["similary"] as $key => $value) {
+                $res = $this->imageProduitRepository->findOneBy(["id_produit" => $value->getId()]);
 
-           return $this->json($data, 200, [
+                $tab['id'] =  $value->getId();
+                $tab['reference'] =  $value->getReference();
+                $tab['nom'] =  $value->getNom();
+                $tab['prix'] =  $value->getPrix();
+                $tab['description'] =  $value->getDescription();
+                $tab['quantite'] =  $value->getQuantite();
+                $tab['dateCreation'] =  $value->getDateCreation();
+                $tab['marque'] =  $value->getMarque();
+                $tab['categorie'] =  $value->getCategorie();
+                $tab['materiaux'] =  $value->getMateriaux();
+
+                $image = $res->getIdImage();
+                $tab['image'] = 'https://localhost:8000/uploads/'.$image->getLien();
+                $myArray["similary"][] = $tab;
+           }
+
+           return $this->json($myArray, 200, [
                'Access-Control-Allow-Origin' => '*'
            ]);
        }

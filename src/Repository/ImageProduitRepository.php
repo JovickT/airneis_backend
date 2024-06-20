@@ -45,10 +45,5 @@ class ImageProduitRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
-
-    public function imagesProductsSimilary()
-    {
-        
-    }
     
 }
