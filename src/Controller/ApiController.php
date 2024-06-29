@@ -273,7 +273,7 @@ class ApiController extends AbstractController
     //         'Access-Control-Allow-Origin' => '*'
     //     ]);
     // }
-    }
+
 
     
     #[Route('api/register', name : 'register_data')] 
