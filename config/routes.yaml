@@ -28,3 +28,9 @@ search_produits:
     path: /search
     controller: App\Controller\ApiController::searchProduits
     methods: [GET]
+
+
+filtre_data:
+    path: /filtre
+    controller: App\Controller\ApiController::filtre
+    methods: [GET,POST]
