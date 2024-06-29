@@ -40,6 +40,10 @@ class Produits
     #[ORM\JoinColumn(name: "categorie", referencedColumnName: "id_categorie")]
     private $categorie;
 
+    #[ORM\ManyToOne(targetEntity: Materiaux::class)]
+    #[ORM\JoinColumn(name: "materiaux", referencedColumnName: "id_materiel")]
+    private $materiaux;
+
 
     public function getId(): ?int
     {
@@ -141,4 +145,17 @@ class Produits
 
         return $this;
     }
+
+    public function getMateriaux(): ?Materiaux
+    {
+        return $this->materiaux;
+    }
+
+    public function setMateriaux(?Materiaux $materiaux): self
+    {
+        $this->materiaux = $materiaux;
+
+        return $this;
+    }
+
 }

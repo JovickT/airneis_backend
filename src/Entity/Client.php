@@ -87,6 +87,9 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
     public function getPassword(): ?string
     {
         return $this->mot_de_passe;
@@ -95,7 +98,6 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $mot_de_passe): static
     {
         $this->mot_de_passe = $mot_de_passe;
-
         return $this;
     }
 
@@ -132,10 +134,14 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
         //$this->password = null;
     }
 
+    /**
+     * @see UserInterface
+     */
     public function getRoles(): array
     {
         $roles = $this->roles ?? [];
         // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }

@@ -59,6 +59,7 @@ class ClientRepository extends ServiceEntityRepository
                 $userData['nom'] = $user->getNom();
                 $userData['email'] = $user->getEmail();
                 $userData['telephone'] = $user->getTelephone();
+                // $userData['mdp'] = $user->getPassword(); //pour debug (à supprimer)
                 $role = $user->getRoles();
                 if($role){
                     $userData['role'] = implode($role);

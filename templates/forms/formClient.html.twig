@@ -2,12 +2,24 @@
 
 {% block content %}
 
-{% if app.request.method == 'POST' %}
-    {% for message in app.flashes('error') %}
-        <div class="alert alert-danger">
-            {{ message }}
-        </div>
-    {% endfor %}
+{% if form_errors(form) %}
+    <div class="alert alert-danger">
+        {{ form_errors(form) }}
+    </div>
+{% endif %}
+
+{# Affichage des erreurs du champ password.second #}
+{% if form_errors(form.password.second) %}
+    <div class="alert alert-danger">
+        {{ form_errors(form.password.second) }}
+    </div>
+{% endif %}
+
+{# Affichage des erreurs du champ password.first #}
+{% if form_errors(form.password.first) %}
+    <div class="alert alert-danger">
+        {{ form_errors(form.password.first) }}
+    </div>
 {% endif %}
   
 <div class="container-fluid px-1 py-5 mx-auto">
@@ -42,14 +54,15 @@
                        {% if title == "Nouvelle Utilisateur" %}
                             <div class="row justify-content-between text-left">
                                 <div class="form-group col-sm-6 flex-column d-flex"> 
-                                    <label class="form-control-label px-3">{{ form_label(form.mot_de_passe) }}<span class="text-danger"> *</span></label> 
-                                    {{ form_widget(form.mot_de_passe, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
+                                    <label class="form-control-label px-3">{{ form_label(form.password.first) }}<span class="text-danger"> *</span></label> 
+                                    {{ form_widget(form.password.first, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
                                 </div>
                                 <div class="form-group col-sm-6 flex-column d-flex"> 
-                                    <label class="form-control-label px-3">vérification mot de passe<span class="text-danger"> *</span></label> 
-                                    <input type="password" class="form-control mt-2" name="verif_mdp"/>
+                                    <label class="form-control-label px-3">{{ form_label(form.password.second) }}<span class="text-danger"> *</span></label> 
+                                    {{ form_widget(form.password.second, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
                                 </div>
                             </div>
+
                         {% endif %}
 
                         <div class="row justify-content-between text-left">

@@ -16,7 +16,7 @@ class Materiaux
     #[ORM\Column(length: 50)]
     private ?string $nom = null;
 
-    public function getId(): ?int
+    public function getIdMateriel(): ?int
     {
         return $this->id_materiel;
     }
