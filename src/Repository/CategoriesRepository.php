@@ -16,9 +16,14 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class CategoriesRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private $produitsRepository;
+    private $imageProduitRepository;
+
+    public function __construct(ManagerRegistry $registry, ProduitsRepository $produitsRepository, ImageProduitRepository $imageProduitRepository)
     {
         parent::__construct($registry, Categories::class);
+        $this->produitsRepository = $produitsRepository;
+        $this->imageProduitRepository = $imageProduitRepository;
     }
 
     //    /**
@@ -46,21 +51,45 @@ class CategoriesRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    public function getCategories(){
+    public function getCategories()
+    {
+        $entityManager = $this->getEntityManager();
+
         $categories = $this->createQueryBuilder('c')
-        ->getQuery()
-        ->getResult();
+            ->getQuery()
+            ->getResult();
 
         $categoriesArray = [];
-            foreach ($categories as $categorie) {
-                $categorieData = [];
-            
-                $categorieData['nom'] = $categorie->getNom();
-        
-                $categoriesArray[] = $categorieData;
-            }
+        foreach ($categories as $categorie) {
+            $categorieData = [];
+            $categorieData['nom'] = $categorie->getNom();
+            $randomProduct =  $this->produitsRepository->createQueryBuilder('p')
+            ->where('p.categorie = :categoryId')
+            ->setParameter('categoryId', $categorie->getIdCategorie())
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getResult();
 
-            return $categoriesArray;
+            if ($randomProduct) {
+                // Step 2: Get a random image of the random product
+                $randomImage = $this->imageProduitRepository->createQueryBuilder('ip')
+                    ->join('ip.id_image', 'i')
+                    ->where('ip.id_produit = :productId')
+                    ->setParameter('productId', $randomProduct[0]->getId())
+                    ->setMaxResults(1)
+                    ->getQuery()
+                    ->getResult();
+
+                if ($randomImage) {
+                    $categorieData['image'] = 'https://localhost:8000/uploads/'.$randomImage[0]->getIdImage()->getLien();
+                } else {
+                    $categorieData['image'] = null;
+                }
+            }            
+            $categoriesArray[] = $categorieData;
+        }
+
+        return $categoriesArray;
     }
 
     public function getAllCategories(): array

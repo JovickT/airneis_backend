@@ -40,6 +40,7 @@ class ApiController extends AbstractController
         // Logique pour récupérer les données et les renvoyer
         $data['produit'] =  $this->produitRepository->getProduits();  // Données à renvoyer
         $data['categorie'] =  $this->categorieRepository->getCategories();  // Données à renvoyer
+
         return $this->json($data , 200, [
             'Access-Control-Allow-Origin' => '*'
         ]);
@@ -52,17 +53,19 @@ class ApiController extends AbstractController
        $prodofCat = $request->query->get('prodofCat');
 
        if ($prodofCat) {
-           // Récupérer les produits de la catégorie
-           $data = $this->produitRepository->findProductsByCategoryName($prodofCat);
+        $data = $this->produitRepository->findProductsByCategoryName($prodofCat);
+ 
+        if (!empty($data)) {
+            return $this->json($data, 200, [
+                'Access-Control-Allow-Origin' => '*'
+            ]);
+        } else {
+            return $this->json(['error' => 'Category not found'], 404, [
+                'Access-Control-Allow-Origin' => '*'
+            ]);
+        }
+    }
 
-           return $this->json($data, 200, [
-               'Access-Control-Allow-Origin' => '*'
-           ]);
-       }
-
-        return $this->json(['error' => 'Category not specified'], 400, [
-            'Access-Control-Allow-Origin' => '*'
-        ]);
     }
 
     #[Route('/produits', name: 'Product_data')]
@@ -97,9 +100,16 @@ class ApiController extends AbstractController
                 $myArray["similary"][] = $tab;
            }
 
-           return $this->json($myArray, 200, [
-               'Access-Control-Allow-Origin' => '*'
-           ]);
+           if(!(empty($myArray["theProduct"]) || empty($myArray["similary"]))){
+                return $this->json($myArray, 200, [
+                    'Access-Control-Allow-Origin' => '*'
+                ]);
+           }else{
+                return $this->json(['error' => 'Category not found'], 404, [
+                    'Access-Control-Allow-Origin' => '*'
+                ]);
+           }
+          
        }
 
         return $this->json(['error' => 'Category not specified'], 400, [
