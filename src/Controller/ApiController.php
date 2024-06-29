@@ -4,6 +4,9 @@ namespace App\Controller;
 
 use App\Entity\ImageCarousel;
 use App\Repository\CarrouselRepository;
+use App\Entity\Client;
+use App\Form\RegistrationFormType;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\CategoriesRepository;
 use App\Repository\ImageCarouselRepository;
 use App\Repository\ImageProduitRepository;
@@ -14,9 +17,18 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\TokenExtractor\TokenExtractorInterface;
 use Symfony\Component\Routing\Attribute\Route;
+<<<<<<< HEAD
 use App\Repository\RechercheRepository;
 
+=======
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+>>>>>>> 2f4d76607bad1d7aa1a237d7dbe1ec7600a85391
 
 class ApiController extends AbstractController
 {
@@ -261,7 +273,39 @@ class ApiController extends AbstractController
     //         'Access-Control-Allow-Origin' => '*'
     //     ]);
     // }
-
+    }
 
     
+    #[Route('api/register', name : 'register_data')] 
+    public function registerApi(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $form = $this->createForm(RegistrationFormType::class, null, ['csrf_protection' => false]);
+        $form->submit($data);
+
+        if (!$form->isValid()) {
+            // Renvoyer les erreurs de validation
+            // $errors = $this->$form;
+            // return $this->json($errors, 400);
+        }
+
+        $user = new Client();
+        $user->setEmail($data['email']);
+        $user->setNom($data['nom']);
+        $user->setPrenom($data['prenom']);
+        $plainPassword = $request->request->get('password');
+        $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
+        $user->setPassword($hashedPassword);
+
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        // Générer un token JWT pour l'utilisateur nouvellement inscrit
+        $token = $this->get('jwt_token_manager')->create($user);
+
+        return $this->json([
+            'token' => $token,
+            'user' => $user->getEmail()
+        ]);
+    }   
 }

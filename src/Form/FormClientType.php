@@ -72,7 +72,7 @@ class FormClientType extends AbstractType
                 'attr' => [
                     'class' => 'form-control', // Ajoutez des classes CSS personnalisées au besoin
                     // Autres attributs HTML personnalisés
-                ],
+                ]
             ])
             ->add('adresse', FormAdresseType::class)
             ->add('save', SubmitType::class, ['label' => 'Ajouter'])

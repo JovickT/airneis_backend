@@ -45,8 +45,6 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToOne(targetEntity: Adresses::class, cascade: ["persist"])]
     #[ORM\JoinColumn(name: "id_adresse", referencedColumnName: "id_adresse")]
     private $adresse;
-
-
    
     public function getIdClient(): ?int
     {

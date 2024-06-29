@@ -6,6 +6,8 @@ controllers:
 
 api_login_check:
     path: /api/login_check
+    methods: [POST]
+    
 frontend_data:
     path: /data
     controller: App\Controller\ApiController::fetchData
