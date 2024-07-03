@@ -13,8 +13,6 @@ class JWTCreatedListener
         
         // Ajoutez les données personnalisées au payload
         $payload['userId'] = $user->getIdClient();
-        $payload['prenom'] = $user->getPrenom();
-        $payload['nom'] = $user->getNom();
 
         $event->setData($payload);
     }

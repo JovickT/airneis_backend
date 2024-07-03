@@ -195,39 +195,39 @@ class ApiController extends AbstractController
     //         'Access-Control-Allow-Origin' => '*'
     //     ]);
     // }
-    }
 
     
-    #[Route('api/register', name : 'register_data')] 
-    public function registerApi(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
-        $form = $this->createForm(RegistrationFormType::class, null, ['csrf_protection' => false]);
-        $form->submit($data);
+    // #[Route('api/register', name : 'register_data')] 
+    // public function registerApi(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
+    // {
+    //     $data = json_decode($request->getContent(), true);
+    //     $form = $this->createForm(RegistrationFormType::class, null, ['csrf_protection' => false]);
+    //     $form->submit($data);
 
-        if (!$form->isValid()) {
-            // Renvoyer les erreurs de validation
-            // $errors = $this->$form;
-            // return $this->json($errors, 400);
-        }
+    //     if (!$form->isValid()) {
+    //         // Renvoyer les erreurs de validation
+    //         // $errors = $this->$form;
+    //         // return $this->json($errors, 400);
+    //     }
 
-        $user = new Client();
-        $user->setEmail($data['email']);
-        $user->setNom($data['nom']);
-        $user->setPrenom($data['prenom']);
-        $plainPassword = $request->request->get('password');
-        $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
-        $user->setPassword($hashedPassword);
+    //     $user = new Client();
+    //     $user->setEmail($data['email']);
+    //     $user->setNom($data['nom']);
+    //     $user->setPrenom($data['prenom']);
+    //     $plainPassword = $request->request->get('password');
+    //     $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
+    //     $user->setPassword($hashedPassword);
 
-        $entityManager->persist($user);
-        $entityManager->flush();
+    //     $entityManager->persist($user);
+    //     $entityManager->flush();
 
-        // Générer un token JWT pour l'utilisateur nouvellement inscrit
-        $token = $this->get('jwt_token_manager')->create($user);
+    //     // Générer un token JWT pour l'utilisateur nouvellement inscrit
+    //     $token = $this->get('jwt_token_manager')->create($user);
 
-        return $this->json([
-            'token' => $token,
-            'user' => $user->getEmail()
-        ]);
-    }   
+    //     return $this->json([
+    //         'token' => $token,
+    //         'user' => $user->getEmail()
+    //     ]);
+    // }
+       
 }

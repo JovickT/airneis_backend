@@ -11,11 +11,8 @@ security:
         login:
             pattern: ^/api/login
             stateless: true
-            provider: app_user_provider
             json_login:
                 check_path: /api/login_check
-                username_path: email
-                password_path: mot_de_passe
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
         api:

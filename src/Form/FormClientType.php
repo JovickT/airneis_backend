@@ -83,6 +83,7 @@ class FormClientType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Client::class,
+            'crsf_protection' => false,
             'validation_groups' => function (FormInterface $form) {
                 $data = $form->getData();
                 return $data->getEmail() ? ['Default'] : ['Default', 'registration'];
