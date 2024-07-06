@@ -42,8 +42,10 @@ class FormClientType extends AbstractType
                 'attr' => [
                     'name' => 'email',
                 ],
-            ])
-            ->add('password', RepeatedType::class, [
+            ]);
+    
+        if ($options['is_new']) {
+            $builder->add('password', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'invalid_message' => 'The password fields must match.',
                 'options' => ['attr' => ['class' => 'password-field']],
@@ -54,12 +56,16 @@ class FormClientType extends AbstractType
                     new Assert\NotBlank(['groups' => ['registration']]),
                     new Assert\Callback([
                         'callback' => [$this, 'validatePassword'],
-                        'groups' => ['registration']
-                    ])
+                        'groups' => ['registration'],
+                    ]),
                 ],
-            ])
+            ]);
+        }
+    
+        $builder
             ->add('telephone', null, [
-                'required' => false
+                'required' => false,
+                'empty_data' => '',
             ])
             ->add('roles', ChoiceType::class, [
                 'choices' => [
@@ -72,17 +78,18 @@ class FormClientType extends AbstractType
                 'attr' => [
                     'class' => 'form-control', // Ajoutez des classes CSS personnalisées au besoin
                     // Autres attributs HTML personnalisés
-                ]
+                ],
             ])
             ->add('adresse', FormAdresseType::class)
-            ->add('save', SubmitType::class, ['label' => 'Ajouter'])
-        ;
+            ->add('save', SubmitType::class, ['label' => 'Ajouter']);
     }
-
+    
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Client::class,
+            'csrf_protection' => false, // Désactive la protection CSRF
+            'is_new' => false, // Définir la valeur par défaut de l'option
             'validation_groups' => function (FormInterface $form) {
                 $data = $form->getData();
                 return $data->getEmail() ? ['Default'] : ['Default', 'registration'];

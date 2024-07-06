@@ -40,7 +40,7 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $mot_de_passe = null;
 
     #[ORM\Column(length: 15)]
-    private ?string $telephone = null;
+    private ?string $telephone = '';
 
     #[ORM\ManyToOne(targetEntity: Adresses::class, cascade: ["persist"])]
     #[ORM\JoinColumn(name: "id_adresse", referencedColumnName: "id_adresse")]
@@ -141,7 +141,9 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $roles = $this->roles ?? [];
         // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        if ($this->roles === null) {
+            $this->roles = ['ROLE_USER'];
+        }
 
         return array_unique($roles);
     }

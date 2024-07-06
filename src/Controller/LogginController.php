@@ -14,18 +14,9 @@ class LogginController extends AbstractController
     #[Route('/', name: 'app_loggin')]
     public function index(#[CurrentUser] ?Client $user, JWTTokenManagerInterface $jwtManager): Response
     {
-        if (null === $user) {
-            return $this->json([
-                'message' => 'missing credentials',
-            ], Response::HTTP_UNAUTHORIZED);
-        }
-
-        // Generate the token
-        $token = $jwtManager->create($user);
-
-        return $this->json([
-            'user'  => $user->getUserIdentifier(),
-            'token' => $token,
+        return $this->render('loggin/index.html.twig', [
+            'controller_name' => 'LogginController',
         ]);
+        
     }
 }

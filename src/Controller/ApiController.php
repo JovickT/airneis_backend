@@ -13,22 +13,13 @@ use App\Repository\ImageProduitRepository;
 use App\Repository\ImageRepository;
 use App\Repository\MateriauxRepository;
 use App\Repository\ProduitsRepository;
+use App\Repository\RechercheRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\TokenExtractor\TokenExtractorInterface;
-use Symfony\Component\Routing\Attribute\Route;
-<<<<<<< HEAD
-use App\Repository\RechercheRepository;
-
-=======
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
->>>>>>> 2f4d76607bad1d7aa1a237d7dbe1ec7600a85391
+use Symfony\Component\Routing\Attribute\Route;
+
 
 class ApiController extends AbstractController
 {
