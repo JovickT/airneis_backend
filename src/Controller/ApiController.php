@@ -23,6 +23,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\TokenExtractor\TokenExtractorInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 class ApiController extends AbstractController
 {
@@ -197,37 +198,39 @@ class ApiController extends AbstractController
     // }
 
     
-    // #[Route('api/register', name : 'register_data')] 
-    // public function registerApi(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
-    // {
-    //     $data = json_decode($request->getContent(), true);
-    //     $form = $this->createForm(RegistrationFormType::class, null, ['csrf_protection' => false]);
-    //     $form->submit($data);
+    #[Route('/api/register', name: 'api_register', methods: ['POST'])]
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
+    {
+        $data = json_decode($request->getContent(), true);
 
-    //     if (!$form->isValid()) {
-    //         // Renvoyer les erreurs de validation
-    //         // $errors = $this->$form;
-    //         // return $this->json($errors, 400);
-    //     }
+        $client = new Client();
+        $form = $this->createForm(RegistrationFormType::class, $client);
+        $form->submit($data);
 
-    //     $user = new Client();
-    //     $user->setEmail($data['email']);
-    //     $user->setNom($data['nom']);
-    //     $user->setPrenom($data['prenom']);
-    //     $plainPassword = $request->request->get('password');
-    //     $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
-    //     $user->setPassword($hashedPassword);
+        if ($form->isValid()) {
+            // Encode the plain password
+            $client->setPassword(
+                $userPasswordHasher->hashPassword(
+                    $client,
+                    $form->get('plainPassword')->getData()
+                )
+            );
 
-    //     $entityManager->persist($user);
-    //     $entityManager->flush();
+            $entityManager->persist($client);
+            $entityManager->flush();
 
-    //     // Générer un token JWT pour l'utilisateur nouvellement inscrit
-    //     $token = $this->get('jwt_token_manager')->create($user);
+            return $this->json([
+                'message' => 'User registered successfully'
+            ], Response::HTTP_CREATED);
+        }
 
-    //     return $this->json([
-    //         'token' => $token,
-    //         'user' => $user->getEmail()
-    //     ]);
-    // }
+        return $this->json($form->getErrors(true, false), Response::HTTP_BAD_REQUEST);
+    }
        
+    #[Route('/api/csrf-token', name: 'api_csrf_token', methods: ['GET'])]
+    public function getCsrfToken(CsrfTokenManagerInterface $csrfTokenManager): JsonResponse
+    {
+        $token = $csrfTokenManager->getToken('authenticate')->getValue();
+        return new JsonResponse(['token' => $token]);
+    }
 }

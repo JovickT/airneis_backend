@@ -21,15 +21,15 @@ class RegistrationFormType extends AbstractType
             ->add('prenom')
             ->add('nom')
             ->add('email')
-            ->add('roles', ChoiceType::class, [
-                'choices' => [
-                    'User' => 'ROLE_USER',
-                    'Admin' => 'ROLE_ADMIN',
-                ],
-                'multiple' => true,
-                'expanded' => false,
-            ])
-            ->add('telephone')
+            // ->add('roles', ChoiceType::class, [
+            //     'choices' => [
+            //         'User' => 'ROLE_USER',
+            //         'Admin' => 'ROLE_ADMIN',
+            //     ],
+            //     'multiple' => true,
+            //     'expanded' => false,
+            // ])
+            // ->add('telephone')
             ->add('agreeTerms', CheckboxType::class, [
                 'mapped' => false,
                 'constraints' => [
