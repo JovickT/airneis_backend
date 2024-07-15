@@ -11,19 +11,15 @@ use App\Repository\CategoriesRepository;
 use App\Repository\ImageCarouselRepository;
 use App\Repository\ImageProduitRepository;
 use App\Repository\ImageRepository;
+use App\Repository\MateriauxRepository;
 use App\Repository\ProduitsRepository;
+use App\Repository\RechercheRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\TokenExtractor\TokenExtractorInterface;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Component\Routing\Attribute\Route;
+
 
 class ApiController extends AbstractController
 {
@@ -32,16 +28,24 @@ class ApiController extends AbstractController
     private $imageProduitRepository;
     private $imageRepository;
     private $carrouselRepository;
+    private $rechercheRepository;
+    private $materiauxRepository;
+
 
     public function __construct(ProduitsRepository $produitRepository,
     CategoriesRepository $categorieRepository,ImageProduitRepository $imageProduitRepository,
-    ImageRepository $imageRepository, CarrouselRepository $carrouselRepository,
+    ImageRepository $imageRepository, CarrouselRepository $carrouselRepository,RechercheRepository $rechercheRepository,
+    MateriauxRepository $materiauxRepository
      ) {
         $this->produitRepository = $produitRepository;
         $this->categorieRepository = $categorieRepository;
         $this->imageProduitRepository = $imageProduitRepository;
         $this->imageRepository = $imageRepository;
         $this->carrouselRepository = $carrouselRepository;
+        $this->produitRepository = $produitRepository;
+        $this->produitRepository = $produitRepository;
+        $this->rechercheRepository = $rechercheRepository;
+        $this->materiauxRepository = $materiauxRepository;
     }
 
     #[Route('/data', name: 'frontend_data')]
@@ -50,6 +54,18 @@ class ApiController extends AbstractController
         // Logique pour récupérer les données et les renvoyer
         $data['produit'] =  $this->produitRepository->getProduits();  // Données à renvoyer
         $data['categorie'] =  $this->categorieRepository->getCategories();  // Données à renvoyer
+
+        return $this->json($data , 200, [
+            'Access-Control-Allow-Origin' => '*'
+        ]);
+    }
+
+    #[Route('/filtre', name: 'filtre_data')]
+    public function filtre(): JsonResponse
+    {
+        // Logique pour récupérer les données et les renvoyer
+        $data['Materiaux'] =  $this->materiauxRepository->findAll();  // Données à renvoyer
+        $data['Catégorie'] =  $this->categorieRepository->findAll();  // Données à renvoyer
         return $this->json($data , 200, [
             'Access-Control-Allow-Origin' => '*'
         ]);
@@ -62,17 +78,19 @@ class ApiController extends AbstractController
        $prodofCat = $request->query->get('prodofCat');
 
        if ($prodofCat) {
-           // Récupérer les produits de la catégorie
-           $data = $this->produitRepository->findProductsByCategoryName($prodofCat);
+        $data = $this->produitRepository->findProductsByCategoryName($prodofCat);
+ 
+        if (!empty($data)) {
+            return $this->json($data, 200, [
+                'Access-Control-Allow-Origin' => '*'
+            ]);
+        } else {
+            return $this->json(['error' => 'Category not found'], 404, [
+                'Access-Control-Allow-Origin' => '*'
+            ]);
+        }
+    }
 
-           return $this->json($data, 200, [
-               'Access-Control-Allow-Origin' => '*'
-           ]);
-       }
-
-        return $this->json(['error' => 'Category not specified'], 400, [
-            'Access-Control-Allow-Origin' => '*'
-        ]);
     }
 
     #[Route('/produits', name: 'Product_data')]
@@ -107,9 +125,16 @@ class ApiController extends AbstractController
                 $myArray["similary"][] = $tab;
            }
 
-           return $this->json($myArray, 200, [
-               'Access-Control-Allow-Origin' => '*'
-           ]);
+           if(!(empty($myArray["theProduct"]) || empty($myArray["similary"]))){
+                return $this->json($myArray, 200, [
+                    'Access-Control-Allow-Origin' => '*'
+                ]);
+           }else{
+                return $this->json(['error' => 'Category not found'], 404, [
+                    'Access-Control-Allow-Origin' => '*'
+                ]);
+           }
+          
        }
 
         return $this->json(['error' => 'Category not specified'], 400, [
@@ -157,6 +182,49 @@ class ApiController extends AbstractController
         ]);
     }
 
+
+    // #[Route('/search', name: 'search_produits')]
+    // public function searchProduits(Request $request): JsonResponse
+    // {
+    //     $keyword = $request->query->get('keyword');
+
+    //     if ($keyword) {
+    //         $data = $this->rechercheRepository->searchProduitsByKeyword($keyword);
+    //         return $this->json($data, 200, [
+    //             'Access-Control-Allow-Origin' => '*'
+    //         ]);
+    //     }
+
+    //     return $this->json(['error' => 'Keyword not specified'], 400, [
+    //         'Access-Control-Allow-Origin' => '*'
+    //     ]);
+    // }
+
+    #[Route('/search', name: 'search_produits')]
+    public function searchProduits(Request $request): JsonResponse
+    {
+        $criteria = [
+            'title' => $request->query->get('title'),
+            'description' => $request->query->get('description'),
+            'material' => $request->query->get('material'),
+            'price_min' => $request->query->get('price_min'),
+            'price_max' => $request->query->get('price_max'),
+            'category' => $request->query->get('category'),
+            'in_stock' => $request->query->get('in_stock'),
+            'sort_by' => $request->query->get('sort_by'),
+            'sort_order' => $request->query->get('sort_order'),
+        ];
+
+        $data = $this->rechercheRepository->searchProduits($criteria);
+
+        return $this->json($data, 200, [
+            'Access-Control-Allow-Origin' => '*'
+        ]);
+    }
+
+
+
+
     // #[Route('/carrousel', name: 'image_carrousel')]
     // public function imagesCarrousel(Request $request): JsonResponse
     // {
@@ -196,6 +264,7 @@ class ApiController extends AbstractController
     //         'Access-Control-Allow-Origin' => '*'
     //     ]);
     // }
+
 
     
     #[Route('/api/register', name: 'api_register', methods: ['POST'])]

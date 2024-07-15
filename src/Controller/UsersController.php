@@ -57,13 +57,13 @@ class UsersController extends AbstractController
         }
 
         // Créer le formulaire et le remplir avec les données du matériau
-        $form = $this->createForm(FormClientType::class, $users);
+        $form = $this->createForm(FormClientType::class, $users, ['is_new' => false]);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Pas besoin de récupérer $_POST, Symfony gère cela pour vous via le formulaire
-    
+            
             // Flush l'EntityManager pour mettre à jour les modifications dans la base de données
             $this->entityManager->flush();
     

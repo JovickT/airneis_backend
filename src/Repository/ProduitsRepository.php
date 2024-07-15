@@ -17,9 +17,12 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ProduitsRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private $imageProduitRepository;
+
+    public function __construct(ManagerRegistry $registry, ImageProduitRepository $imageProduitRepository)
     {
         parent::__construct($registry, Produits::class);
+        $this->imageProduitRepository = $imageProduitRepository;
     }
 
     //    /**
@@ -108,11 +111,46 @@ class ProduitsRepository extends ServiceEntityRepository
 
     public function findProductsByName(string $produitName): array
     {
-
-        return $this->createQueryBuilder('p')
-        ->where('p.nom = :produitName')
-        ->setParameter('produitName', $produitName)
-        ->getQuery()
-        ->getResult();
+        // Récupère les produits correspondant au nom donné
+        $produits = $this->createQueryBuilder('p')
+            ->where('p.nom = :produitName')
+            ->setParameter('produitName', $produitName)
+            ->getQuery()
+            ->getResult();
+    
+        $res = [];
+    
+        foreach ($produits as $produit) {
+            $produitArray = [];
+            $produitArray["id"] = $produit->getId();
+            $produitArray["nom"] = $produit->getNom();
+            $produitArray["prix"] = $produit->getPrix();
+            $produitArray["quantite"] = $produit->getQuantite();
+            $produitArray["reference"] = $produit->getReference();
+            $produitArray["description"] = $produit->getDescription();
+            $produitArray["dateCreation"] = $produit->getDateCreation();
+            $produitArray["categorie"] = $produit->getCategorie();
+            $produitArray["marque"] = $produit->getMarque();
+            $produitArray["materiaux"] = $produit->getMateriaux();
+    
+            // Récupère une image aléatoire pour le produit
+            $randomImage = $this->imageProduitRepository->createQueryBuilder('ip')
+                ->join('ip.id_image', 'i')
+                ->where('ip.id_produit = :productId')
+                ->setParameter('productId', $produit->getId())
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getResult();
+    
+            if ($randomImage) {
+                $produitArray['image'] = 'https://localhost:8000/uploads/'.$randomImage[0]->getIdImage()->getLien();
+            } else {
+                $produitArray['image'] = null;
+            }
+    
+            $res[] = $produitArray;
+        }
+    
+        return $res;
     }
 }

@@ -55,7 +55,7 @@ class HomeController extends AbstractController
     #[Route('/addClient', name: 'app_form_client')]
     public function displayAddForm(Request $request) : Response{
         $client = new Client();
-        $form = $this->createForm(FormClientType::class, $client);
+        $form = $this->createForm(FormClientType::class, $client,['is_new' => true]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

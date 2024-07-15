@@ -19,6 +19,7 @@ class FormCategorieType extends AbstractType
             ],
         ])
         ->add('save', SubmitType::class, ['label' => 'Ajouter'])
+        
         ;
     }
 

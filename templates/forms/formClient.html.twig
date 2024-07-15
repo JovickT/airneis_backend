@@ -8,18 +8,20 @@
     </div>
 {% endif %}
 
-{# Affichage des erreurs du champ password.second #}
-{% if form_errors(form.password.second) %}
-    <div class="alert alert-danger">
-        {{ form_errors(form.password.second) }}
-    </div>
-{% endif %}
-
 {# Affichage des erreurs du champ password.first #}
-{% if form_errors(form.password.first) %}
-    <div class="alert alert-danger">
-        {{ form_errors(form.password.first) }}
-    </div>
+{% if form.password is defined %}
+    {% if form_errors(form.password.first) %}
+        <div class="alert alert-danger">
+            {{ form_errors(form.password.first) }}
+        </div>
+    {% endif %}
+
+    {# Affichage des erreurs du champ password.second #}
+    {% if form_errors(form.password.second) %}
+        <div class="alert alert-danger">
+            {{ form_errors(form.password.second) }}
+        </div>
+    {% endif %}
 {% endif %}
   
 <div class="container-fluid px-1 py-5 mx-auto">
