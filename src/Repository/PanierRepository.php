@@ -2,27 +2,27 @@
 
 namespace App\Repository;
 
-use App\Entity\Adresses;
+use App\Entity\Panier;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Adresses>
+ * @extends ServiceEntityRepository<Panier>
  *
- * @method Adresses|null find($id, $lockMode = null, $lockVersion = null)
- * @method Adresses|null findOneBy(array $criteria, array $orderBy = null)
- * @method Adresses[]    findAll()
- * @method Adresses[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Panier|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Panier|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Panier[]    findAll()
+ * @method Panier[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class AdressesRepository extends ServiceEntityRepository
+class PanierRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Adresses::class);
+        parent::__construct($registry, Panier::class);
     }
 
     //    /**
-    //     * @return Adresses[] Returns an array of Adresses objects
+    //     * @return Panier[] Returns an array of Panier objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -36,7 +36,7 @@ class AdressesRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Adresses
+    //    public function findOneBySomeField($value): ?Panier
     //    {
     //        return $this->createQueryBuilder('a')
     //            ->andWhere('a.exampleField = :val')
@@ -45,14 +45,4 @@ class AdressesRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
-
-    public function findOneByAddress(string $rue, string $codePostal, string $ville, string $pays): ?Adresses
-    {
-        return $this->findOneBy([
-            'rue' => $rue,
-            'code_postal' => $codePostal,
-            'ville' => $ville,
-            'pays' => $pays,
-        ]);
-    }
 }

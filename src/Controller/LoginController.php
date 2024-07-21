@@ -67,7 +67,7 @@ class LoginController extends AbstractController
             'prenom' => $user->getPrenom(),
             'nom' => $user->getNom(),
             'telephone' => $user->getTelephone(),
-            'adresse' => $user->getAdresse()
+            // 'adresse' => $user->getAdresse()
         ]);
     }
 

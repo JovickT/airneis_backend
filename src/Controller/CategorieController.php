@@ -26,14 +26,20 @@ class CategorieController extends AbstractController
             'controller_name' => 'CategorieController',
             'title' => 'Liste de catégories',
             'categories' => $this->displaycategorie(),
-            'tableHedears' => ['Nom']
+            'tableHedears' => ['Nom', 'Image']
         ]);
     }
 
     public function displaycategorie(){
-        $categorie = $this->categorieRepository->getCategories();
 
-        return $categorie;
+        $categories = $this->categorieRepository->getCategories();
+
+        foreach ($categories as &$categorie) {
+            unset($categorie['images']);
+        }
+        unset($categorie); // rompre la référence avec le dernier élément
+
+        return $categories;
     }
 
     #[Route('/addCategorie', name: 'app_form_categorie')]

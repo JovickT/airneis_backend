@@ -53,16 +53,16 @@ class CategoriesRepository extends ServiceEntityRepository
 
     public function getCategories()
     {
-        $entityManager = $this->getEntityManager();
 
         $categories = $this->createQueryBuilder('c')
             ->getQuery()
             ->getResult();
 
         $categoriesArray = [];
-        foreach ($categories as $categorie) {
+        foreach ($categories as $key => $categorie) {
             $categorieData = [];
             $categorieData['nom'] = $categorie->getNom();
+
             $randomProduct =  $this->produitsRepository->createQueryBuilder('p')
             ->where('p.categorie = :categoryId')
             ->setParameter('categoryId', $categorie->getIdCategorie())
@@ -71,22 +71,19 @@ class CategoriesRepository extends ServiceEntityRepository
             ->getResult();
 
             if ($randomProduct) {
-                // Step 2: Get a random image of the random product
-                $randomImage = $this->imageProduitRepository->createQueryBuilder('ip')
-                    ->join('ip.id_image', 'i')
-                    ->where('ip.id_produit = :productId')
-                    ->setParameter('productId', $randomProduct[0]->getId())
-                    ->setMaxResults(1)
-                    ->getQuery()
-                    ->getResult();
 
-                if ($randomImage) {
-                    $categorieData['image'] = 'https://localhost:8000/uploads/'.$randomImage[0]->getIdImage()->getLien();
-                } else {
-                    $categorieData['image'] = null;
+                $images = $randomProduct[0]->getProduitImages();
+                foreach ($images as $imageProduit) {
+                    $image = $imageProduit->getImage();
+                    if ($image) {
+                        $categorieData['images'] = 'https://localhost:8000/uploads/'.$image->getLien();
+                        $categorieData['display'] = "<img src='/uploads/{$image->getLien()}' alt='Image' width='100' />";
+                    }
                 }
+
             }            
             $categoriesArray[] = $categorieData;
+
         }
 
         return $categoriesArray;

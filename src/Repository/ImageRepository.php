@@ -57,4 +57,18 @@ class ImageRepository extends ServiceEntityRepository
 
             return $imagesArray;
     }
+
+    public function displayImage(){
+        $images = $this->findAll();
+
+        $imageData = [];
+        foreach ($images as $image) {
+            $imageData[] = [
+                'lien' => $image->getLien(),
+                'display' => "<img src='/uploads/{$image->getLien()}' alt='Image' width='100' />"
+            ];
+        }
+
+        return $imageData;
+    }
 }

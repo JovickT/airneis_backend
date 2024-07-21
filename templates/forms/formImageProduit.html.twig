@@ -23,29 +23,32 @@
             <h3 class="mb-3">{{ title }}</h3>
             <div class="card">
                 <h5 class="text-center my-4">Formulaire Image</h5>
-                <form class="form-card p-3" method="post" enctype="multipart/form-data">
-                    {% block form_fields %}
-                        <div class="row justify-content-between text-left">
-                            <div class="form-group col-sm-6 flex-column d-flex"> 
-                                <label class="form-control-label px-3">{{ form_label(form.id_image) }}<span class="text-danger"> *</span></label> 
-                                {{ form_widget(form.id_image, { 'attr': {'class': 'form-control'} }) }}
-                            </div>
-                            <div class="form-group col-sm-6 flex-column d-flex"> 
-                                <label class="form-control-label px-3">{{ form_label(form.id_produit) }}<span class="text-danger"> *</span></label> 
-                                {{ form_widget(form.id_produit, { 'attr': {'class': 'form-control'} }) }}
-                            </div>
-                        </div>
-                        <div class="d-flex flex-column text-left mb-4">
-                            <label for="imagePreview" class="ml-4">Preview:</label>
-                            <img id="imagePreview" src="#" alt="Image preview" style="max-width: 300px; display: none;" />
-                        </div>
-                    {% endblock %}
-                    <div class="row justify-content-end">
-                        <div class="form-group col-sm-6"> 
-                            <button type="submit" class="btn-block btn-primary">Lier</button> 
-                        </div>
-                    </div>
-                </form>
+               <form class="form-card p-3" method="post" enctype="multipart/form-data">
+    <form class="form-card p-3" method="post" enctype="multipart/form-data">
+    {% block form_fields %}
+        <div class="row justify-content-between text-left">
+            <div class="form-group col-sm-6 flex-column d-flex">
+                <label class="form-control-label px-3">{{ form_label(form.image) }}<span class="text-danger"> *</span></label>
+                {{ form_widget(form.image, { 'attr': {'class': 'form-control'} }) }}
+            </div>
+            <div class="form-group col-sm-6 flex-column d-flex">
+                <label class="form-control-label px-3">{{ form_label(form.produit) }}<span class="text-danger"> *</span></label>
+                {{ form_widget(form.produit, { 'attr': {'class': 'form-control'} }) }}
+            </div>
+        </div>
+        <div class="d-flex flex-column text-left mb-4">
+            <label for="imagePreview" class="ml-4">Preview:</label>
+            <img id="imagePreview" src="#" alt="Image preview" style="max-width: 300px; display: none;" />
+        </div>
+    {% endblock %}
+    <div class="row justify-content-end">
+        <div class="form-group col-sm-6">
+            <button type="submit" class="btn-block btn-primary">Lier</button>
+        </div>
+    </div>
+</form>
+
+
             </div>
         </div>
     </div>

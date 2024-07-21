@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ClientRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -12,7 +14,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class Client implements UserInterface, PasswordAuthenticatedUserInterface
 {
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -27,25 +28,35 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 80, unique: true)]
     private ?string $email = null;
 
-    /**
-     * @var list<string> The user roles
-     */
     #[ORM\Column]
     private ?array $roles = null;
 
-    /**
-     * @var string The hashed password
-     */
     #[ORM\Column]
     private ?string $mot_de_passe = null;
 
     #[ORM\Column(length: 15)]
     private ?string $telephone = '';
 
-    #[ORM\ManyToOne(targetEntity: Adresses::class, cascade: ["persist"])]
-    #[ORM\JoinColumn(name: "id_adresse", referencedColumnName: "id_adresse")]
-    private $adresse;
-   
+    #[ORM\ManyToMany(targetEntity: Adresses::class, cascade: ["persist"])]
+    #[ORM\JoinTable(name: "client_adresse",
+        joinColumns: [new ORM\JoinColumn(name: "client_id", referencedColumnName: "id_client")],
+        inverseJoinColumns: [new ORM\JoinColumn(name: "adresse_id", referencedColumnName: "id_adresse")]
+    )]
+    private Collection $adresses;
+
+    // #[ORM\ManyToOne(targetEntity: Panier::class)]
+    // #[ORM\JoinColumn(name: "panier_en_cours_id", referencedColumnName: "id_panier", nullable: true)]
+    // private ?Panier $panierEnCours = null;
+
+    #[ORM\OneToMany(mappedBy: 'client', targetEntity: Panier::class, cascade: ['persist', 'remove'])]
+    private Collection $paniers;
+
+    public function __construct()
+    {
+        $this->adresses = new ArrayCollection();
+        $this->paniers = new ArrayCollection(); // Initialisation de la collection de paniers
+    }
+
     public function getIdClient(): ?int
     {
         return $this->id_client;
@@ -87,9 +98,6 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @see PasswordAuthenticatedUserInterface
-     */
     public function getPassword(): ?string
     {
         return $this->mot_de_passe;
@@ -113,34 +121,74 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getAdresse(): ?Adresses
+    public function getAdresses(): Collection
     {
-        return $this->adresse;
+        return $this->adresses;
     }
 
-    public function setAdresse(?Adresses $adresse): self
+    public function addAdresse(Adresses $adresse): self
     {
-        $this->adresse = $adresse;
+        if (!$this->adresses->contains($adresse)) {
+            $this->adresses->add($adresse);
+        }
 
         return $this;
     }
 
-    /**
-     * @see UserInterface
-     */
+    public function removeAdresse(Adresses $adresse): self
+    {
+        $this->adresses->removeElement($adresse);
+
+        return $this;
+    }
+
+    // public function getPanierEnCours(): ?Panier
+    // {
+    //     return $this->panierEnCours;
+    // }
+
+    // public function setPanierEnCours(?Panier $panierEnCours): self
+    // {
+    //     $this->panierEnCours = $panierEnCours;
+
+    //     return $this;
+    // }
+
+    public function getPaniers(): Collection
+    {
+        return $this->paniers;
+    }
+
+    public function addPanier(Panier $panier): self
+    {
+        if (!$this->paniers->contains($panier)) {
+            $this->paniers->add($panier);
+            $panier->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removePanier(Panier $panier): self
+    {
+        if ($this->paniers->removeElement($panier)) {
+            // set the owning side to null (unless already changed)
+            if ($panier->getClient() === $this) {
+                $panier->setClient(null);
+            }
+        }
+
+        return $this;
+    }
+
     public function eraseCredentials(): void
     {
         // Effacer les informations sensibles (comme le mot de passe)
-        //$this->password = null;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function getRoles(): array
     {
         $roles = $this->roles ?? [];
-        // guarantee every user at least has ROLE_USER
         if ($this->roles === null) {
             $this->roles = ['ROLE_USER'];
         }
@@ -148,9 +196,6 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
         return array_unique($roles);
     }
 
-    /**
-     * @param list<string> $roles
-     */
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
@@ -158,14 +203,8 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
-     */
     public function getUserIdentifier(): string
     {
         return $this->email;
     }
-    
 }

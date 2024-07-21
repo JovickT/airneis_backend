@@ -67,22 +67,8 @@ class ImageController extends AbstractController
         return $this->render('image.html.twig', [
             'controller_name' => 'ImageController',
             'title' => 'Liste des Images',
-            'images' => $this->displayImage(),
+            'images' => $this->imageRepository->displayImage(),
             'tableHedears' => ['Images','Affichage']
         ]);
-    }
-
-    public function displayImage(){
-        $images = $this->imageRepository->findAll();
-
-        $imageData = [];
-        foreach ($images as $image) {
-            $imageData[] = [
-                'lien' => $image->getLien(),
-                'display' => "<img src='/uploads/{$image->getLien()}' alt='Image' width='100' />"
-            ];
-        }
-
-        return $imageData;
     }
 }
