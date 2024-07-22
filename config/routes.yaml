@@ -29,7 +29,7 @@ image_product:
 search_produits:
     path: /search
     controller: App\Controller\ApiController::searchProduits
-    methods: [GET]
+    methods: [POST]
 
 
 filtre_data:

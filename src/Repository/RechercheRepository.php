@@ -1,32 +1,5 @@
 <?php
 
-// namespace App\Repository;
-
-// use App\Entity\Produits;
-// use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-// use Doctrine\Persistence\ManagerRegistry;
-
-// class RechercheRepository extends ServiceEntityRepository
-// {
-//     public function __construct(ManagerRegistry $registry)
-//     {
-//         parent::__construct($registry, Produits::class);
-//     }
-
-//     public function searchProduitsByKeyword(string $keyword): array
-//     {
-//         return $this->createQueryBuilder('p')
-//             ->where('p.nom LIKE :keyword')
-//             ->orWhere('p.description LIKE :keyword')
-//             ->setParameter('keyword', '%' . $keyword . '%')
-//             ->getQuery()
-//             ->getResult();
-//     }
-// }
-
-
-
-
 namespace App\Repository;
 
 use App\Entity\Produits;
@@ -54,9 +27,16 @@ class RechercheRepository extends ServiceEntityRepository
                 ->setParameter('description', '%' . $criteria['description'] . '%');
         }
 
-        if (isset($criteria['material'])) {
-            $qb->andWhere('p.material LIKE :material')
-                ->setParameter('material', '%' . $criteria['material'] . '%');
+        if (isset($criteria['material']) && !empty($criteria['material'])) {
+            $qb->innerJoin('p.materiaux', 'm')
+                ->andWhere('m.nom IN (:material)')
+                ->setParameter('material', $criteria['material']);
+        }
+
+        if (isset($criteria['category']) && !empty($criteria['category'])) {
+            $qb->innerJoin('p.categorie', 'c')
+                ->andWhere('c.nom IN (:category)')
+                ->setParameter('category', $criteria['category']);
         }
 
         if (isset($criteria['price_min'])) {
@@ -69,17 +49,11 @@ class RechercheRepository extends ServiceEntityRepository
                 ->setParameter('price_max', $criteria['price_max']);
         }
 
-        if (isset($criteria['category'])) {
-            $qb->innerJoin('p.categorie', 'c')
-                ->andWhere('c.nom = :category')
-                ->setParameter('category', $criteria['category']);
-        }
-
         if (isset($criteria['in_stock']) && $criteria['in_stock']) {
             $qb->andWhere('p.quantite > 0');
         }
 
-        // Add sorting
+        // Pas utilisé pour le moment
         if (isset($criteria['sort_by'])) {
             $sortBy = $criteria['sort_by'];
             $sortOrder = $criteria['sort_order'] ?? 'ASC';

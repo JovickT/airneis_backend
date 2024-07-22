@@ -65,7 +65,7 @@ class ProduitsRepository extends ServiceEntityRepository
             $produitData['description'] = $produit->getDescription();
             $produitData['quantite'] = $produit->getQuantite();
             $date_creation = $produit->getDateCreation();
-            $produitData['date_creation'] = $date_creation->format('d/m/Y');
+            $produitData['date_creation'] = $date_creation->format('Y/m/d');
 
             $marque = $produit->getMarque();
             if ($marque) {

@@ -100,13 +100,13 @@ class ApiController extends AbstractController
        $produits = $request->query->get('produits');
        $categories = $request->query->get('categories');
 
-       if ($produits) {
+        if ($produits) {
            // Récupérer les produits de la catégorie
             $data["theProduct"] = $this->produitRepository->findProductsByName($produits);
             $data["similary"] = $this->produitRepository->findProductsByCategoryName($categories);
             $myArray["theProduct"] = $data["theProduct"];
            
-           foreach ($data["similary"] as $key => $value) {
+            foreach ($data["similary"] as $key => $value) {
                 $res = $this->imageProduitRepository->findOneBy(["id_produit" => $value->getId()]);
 
                 $tab['id'] =  $value->getId();
@@ -183,43 +183,46 @@ class ApiController extends AbstractController
     }
 
 
-    // #[Route('/search', name: 'search_produits')]
-    // public function searchProduits(Request $request): JsonResponse
-    // {
-    //     $keyword = $request->query->get('keyword');
-
-    //     if ($keyword) {
-    //         $data = $this->rechercheRepository->searchProduitsByKeyword($keyword);
-    //         return $this->json($data, 200, [
-    //             'Access-Control-Allow-Origin' => '*'
-    //         ]);
-    //     }
-
-    //     return $this->json(['error' => 'Keyword not specified'], 400, [
-    //         'Access-Control-Allow-Origin' => '*'
-    //     ]);
-    // }
-
-    #[Route('/search', name: 'search_produits')]
+    #[Route('/search', name: 'search_produits',methods: ['POST'])]
     public function searchProduits(Request $request): JsonResponse
     {
+        $data = json_decode($request->getContent(), true);
         $criteria = [
-            'title' => $request->query->get('title'),
-            'description' => $request->query->get('description'),
-            'material' => $request->query->get('material'),
-            'price_min' => $request->query->get('price_min'),
-            'price_max' => $request->query->get('price_max'),
-            'category' => $request->query->get('category'),
-            'in_stock' => $request->query->get('in_stock'),
-            'sort_by' => $request->query->get('sort_by'),
-            'sort_order' => $request->query->get('sort_order'),
+            "in_stock"=>$data["stock"],
+            "price_max"=>$data["maxPrice"],
+            "price_min"=>$data["minPrice"],
+            "title"=>$data["nameProduct"],
+            "material"=>$data["materiaux"],
+            "category"=>$data["categories"],
+
         ];
 
         $data = $this->rechercheRepository->searchProduits($criteria);
 
-        return $this->json($data, 200, [
+        $table=[];
+        $resultat=[];
+        foreach ($data as $key => $value) {
+            $res = $this->imageProduitRepository->findOneBy(["id_produit" => $value->getId()]);
+
+            $table=["nom" => $value -> getNom(),
+            "prix" => $value -> getPrix(),
+            "quantite" => $value -> getQuantite(),
+            "category" => $value -> getCategorie(),
+            // "date_creation " => $value -> getDateCreation()
+            'dateCreation' => $value -> getDateCreation()->format('Y-m-d H:i:s')
+
+            ];
+            $image = $res->getIdImage();
+            $table['image'][] = 'https://localhost:8000/uploads/'.$image->getLien();
+
+            $resultat[]=$table;
+
+        }
+
+        return $this->json($resultat, 200, [
             'Access-Control-Allow-Origin' => '*'
         ]);
+        
     }
 
 
@@ -267,36 +270,4 @@ class ApiController extends AbstractController
 
 
     
-    #[Route('api/register', name : 'register_data')] 
-    public function registerApi(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
-        $form = $this->createForm(RegistrationFormType::class, null, ['csrf_protection' => false]);
-        $form->submit($data);
-
-        if (!$form->isValid()) {
-            // Renvoyer les erreurs de validation
-            // $errors = $this->$form;
-            // return $this->json($errors, 400);
-        }
-
-        $user = new Client();
-        $user->setEmail($data['email']);
-        $user->setNom($data['nom']);
-        $user->setPrenom($data['prenom']);
-        $plainPassword = $request->request->get('password');
-        $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
-        $user->setPassword($hashedPassword);
-
-        $entityManager->persist($user);
-        $entityManager->flush();
-
-        // Générer un token JWT pour l'utilisateur nouvellement inscrit
-        $token = $this->get('jwt_token_manager')->create($user);
-
-        return $this->json([
-            'token' => $token,
-            'user' => $user->getEmail()
-        ]);
-    }   
 }
