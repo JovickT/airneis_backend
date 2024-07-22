@@ -41,13 +41,17 @@ class ProduitController extends AbstractController
             'controller_name' => 'ProduitController',
             'title' => 'Liste de Produits',
             'produits' => $this->displayProduit(),
-            'tableHedears' => ['Référence','Nom','Prix €','Description','Quantité','Date de création','Marque','Catégorie']
+            'tableHedears' => ['Référence','Nom','Prix €','Description','Quantité','Date de création','Marque','Catégorie','Image']
         ]);
     }
 
     public function displayProduit(){
         $produits = $this->produitRepository->getProduits();
-
+        foreach ($produits as &$produit) {
+            unset($produit['images']);
+        }
+        unset($produit); // rompre la référence avec le dernier élément
+        
         return $produits;
     }
 
@@ -166,8 +170,8 @@ class ProduitController extends AbstractController
             $image = $imageProduitData->getIdImage();
             $produit = $imageProduitData->getIdProduit();
             
-            $imageProduit->setIdImage($image);
-            $imageProduit->setIdProduit($produit);
+            $imageProduit->setImage($image);
+            $imageProduit->setProduit($produit);
 
             // dd($test,$test1);
 

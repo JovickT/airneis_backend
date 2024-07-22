@@ -15,8 +15,7 @@ class LogginController extends AbstractController
     public function index(#[CurrentUser] ?Client $user, JWTTokenManagerInterface $jwtManager): Response
     {
         return $this->render('loggin/index.html.twig', [
-            'controller_name' => 'LogginController',
+           'controller_name' => 'LogginController',
         ]);
-        
     }
 }

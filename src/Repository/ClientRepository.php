@@ -66,12 +66,12 @@ class ClientRepository extends ServiceEntityRepository
                 }else{
                     $userData['role'] = '';
                 }
-                $adresse = $user->getAdresse();
-                if ($adresse) {
-                    $userData['adresse'] = $adresse->getRue().' '.$adresse->getCodePostal().' '.$adresse->getVille();
-                } else {
-                    $userData['adresse'] = null;
+                $adresses = $user->getAdresses();
+                $adresseStrings = [];
+                foreach ($adresses as $adresse) {
+                    $adresseStrings[] = $adresse->getRue() . ' ' . $adresse->getCodePostal() . ' ' . $adresse->getVille();
                 }
+                $userData['adresses'] = implode('; ', $adresseStrings);
         
                 $usersArray[] = $userData;
             }

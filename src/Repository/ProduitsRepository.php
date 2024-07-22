@@ -54,7 +54,6 @@ class ProduitsRepository extends ServiceEntityRepository
         $produits = $this->createQueryBuilder('c')
         ->getQuery()
         ->getResult();
-
         $produitsArray = [];
         foreach ($produits as $produit) {
             $produitData = [];
@@ -80,7 +79,17 @@ class ProduitsRepository extends ServiceEntityRepository
             } else {
                 $produitData['categorie'] = null;
             }
-    
+
+            $images = $produit->getProduitImages();
+            foreach ($images as $imageProduit) {
+                $image = $imageProduit->getImage();
+                if ($image) {
+                    $produitData['images'] = 'https://localhost:8000/uploads/'.$image->getLien();
+                    $produitData['display'] = "<img src='/uploads/{$image->getLien()}' alt='Image' width='100' />";
+
+                }
+            }
+
             $produitsArray[] = $produitData;
         }
 
@@ -132,24 +141,20 @@ class ProduitsRepository extends ServiceEntityRepository
             $produitArray["categorie"] = $produit->getCategorie();
             $produitArray["marque"] = $produit->getMarque();
             $produitArray["materiaux"] = $produit->getMateriaux();
-    
-            // Récupère une image aléatoire pour le produit
-            $randomImage = $this->imageProduitRepository->createQueryBuilder('ip')
-                ->join('ip.id_image', 'i')
-                ->where('ip.id_produit = :productId')
-                ->setParameter('productId', $produit->getId())
-                ->setMaxResults(1)
-                ->getQuery()
-                ->getResult();
-    
-            if ($randomImage) {
-                $produitArray['image'] = 'https://localhost:8000/uploads/'.$randomImage[0]->getIdImage()->getLien();
-            } else {
-                $produitArray['image'] = null;
+
+            $images = $produit->getProduitImages();
+            foreach ($images as $imageProduit) {
+                $image = $imageProduit->getImage();
+                if ($image) {
+                    $produitArray["images"] = 'https://localhost:8000/uploads/'.$image->getLien();
+
+                }
             }
-    
+
             $res[] = $produitArray;
+
         }
+
     
         return $res;
     }
