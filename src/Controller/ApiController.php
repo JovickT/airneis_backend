@@ -32,6 +32,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Validator\Constraints\Length;
 
 class ApiController extends AbstractController
 {
@@ -204,27 +205,53 @@ class ApiController extends AbstractController
         ]);
     }
 
-    #[Route('/search', name: 'search_produits')]
+    #[Route('/search', name: 'search_produits', methods: ["POST", "GET"])]
     public function searchProduits(Request $request): JsonResponse
     {
+        $data = json_decode($request->getContent(), true);
+
+        if (is_null($data)) {
+            return new JsonResponse(['error' => 'Données invalides'], 400);
+        }
+        
         $criteria = [
-            'title' => $request->query->get('title'),
-            'description' => $request->query->get('description'),
-            'material' => $request->query->get('material'),
-            'price_min' => $request->query->get('price_min'),
-            'price_max' => $request->query->get('price_max'),
-            'category' => $request->query->get('category'),
-            'in_stock' => $request->query->get('in_stock'),
-            'sort_by' => $request->query->get('sort_by'),
-            'sort_order' => $request->query->get('sort_order'),
+            "in_stock"=>$data["stock"],
+            "price_max"=>$data["maxPrice"],
+            "price_min"=>$data["minPrice"],
+            "title"=>$data["nameProduct"],
+            "material"=>$data["materiaux"],
+            "category"=>$data["categories"],
+
         ];
 
         $data = $this->rechercheRepository->searchProduits($criteria);
 
-        return $this->json($data, 200, [
+        $table=[];
+        $resultat=[];
+        foreach ($data as $key => $value) {
+            $res = $this->imageProduitRepository->findOneBy(["produit" => $value]);
+
+            $table=["nom" => $value -> getNom(),
+            "prix" => $value -> getPrix(),
+            "quantite" => $value -> getQuantite(),
+            "category" => $value -> getCategorie(),
+            // "date_creation " => $value -> getDateCreation()
+            'dateCreation' => $value -> getDateCreation()->format('Y-m-d H:i:s')
+
+            ];
+            $image = $this->imageRepository->find($res);
+            $table['image'][] = 'https://localhost:8000/uploads/'.$image->getLien();
+
+            $resultat[]=$table;
+
+        }
+
+        return $this->json($resultat, 200, [
             'Access-Control-Allow-Origin' => '*'
         ]);
+        
     }
+
 
 
 
@@ -342,7 +369,7 @@ class ApiController extends AbstractController
         //     return new JsonResponse(['error' => 'Email non fourni'], 400);
         // }
 
-        $user = $this->clientRepository->find(40);
+        $user = $this->clientRepository->find(1);
 
 if (!$user) {
     return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
@@ -361,7 +388,7 @@ foreach ($monPanier as $panier) {
 
 try {
     $entityManager->beginTransaction();
-
+    date_default_timezone_set('Europe/Paris');
     if ($panierEnCours) {
         // Si un panier "en cours" existe, mettez-le à jour
         $panierEnCours->setLots($data);
@@ -369,6 +396,7 @@ try {
         // dd($panierEnCours);
     } else {
         // Sinon, créez un nouveau panier
+        
         $panier = new Panier();
         $panier->setLots($data);
         $panier->setClient($user);
@@ -387,82 +415,94 @@ try {
 }
     }
 
-    #[Route('/commande', name: 'app_commande', methods: ['GET','POST'])]
+    #[Route('/commande', name: 'app_commande')]
     public function commande(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-
         $data = json_decode($request->getContent(), true);
-        
+        // dd($data);
+    
         if (is_null($data)) {
-            dd($data);
             return new JsonResponse(['error' => 'Données invalides'], 400);
         }
-
-        // $repoU = json_decode($data['user'], true);
-        $repoL = json_decode($data['livraison'], true);
-
-        // if (!isset($repoU['email'])) {
-        //     return new JsonResponse(['error' => 'Email non fourni'], 400);
-        // }
+        $repoL = $data['livraison'];
+        $user = $this->clientRepository->find(1);
     
-        $user = $this ->clientRepository->find(40);
-
-
         if (!$user) {
-            return new JsonResponse(['error' => 'Utilisateur non authentifié:'. $user], 401);
+            return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
         }
 
-        if(isset($repoL['saveLivraison']) && $repoL['saveLivraison']){
-            $rue = $repoL['adresse1'];
-            $cp = $repoL['cp'];
-            $ville = $repoL['ville'];
-            $pays = $repoL['pays'];
+        $rue = $repoL['adresse1'];
+        $cp = $repoL['cp'];
+        $ville = $repoL['ville'];
+        $pays = $repoL['pays'];
 
-            $check = $this->adresseRepository->findOneByAddress($rue,$cp,$ville,$pays);
-            if(!isset($check)){
-                $newAdresse = new Adresses();
-                $newAdresse->setRue($rue);
-                $newAdresse->setCodePostal($cp);
-                $newAdresse->setVille($ville);
-                $newAdresse->setPays($pays);
-                $entityManager->persist($newAdresse);
+    
+        $check = $this->adresseRepository->findOneByAddress($rue, $cp, $ville, $pays);
+
+        if(!$check){
+            $newAdresse = new Adresses();
+            $newAdresse->setRue($rue);
+            $newAdresse->setCodePostal($cp);
+            $newAdresse->setVille($ville);
+            $newAdresse->setPays($pays);
+            $entityManager->persist($newAdresse);
+            $entityManager->flush();
+        }else{
+            $newAdresse = $this->adresseRepository->find($check->getId()); 
+        }
+      
+
+        if(isset($repoL['saveLivraison']) && $repoL['saveLivraison']) {
+           
+            if (!$check) {
+                // Flush here to ensure the address is persisted before use
                 $user->addAdresse($newAdresse);
             }
-
+    
+            if (isset($repoL['telephone']) && $repoL['telephone']) {
+                $user->setTelephone($repoL['telephone']);
+            }
+    
             $panier = $repoL['panier'];
-
-            foreach ($panier as $key => $value) {
+    
+            foreach ($panier as $value) {
                 $produit = $this->produitRepository->findOneBy(['nom' => $value['nom']]);
-                $newQuantite = $produit->getQuantite() - $value['quantite'];
-                $produit->setQuantite($newQuantite);
-
-                $entityManager->persist($produit);
+                if ($produit) {
+                    $newQuantite = $produit->getQuantite() - $value['quantite'];
+                    $produit->setQuantite($newQuantite);
+                    $entityManager->persist($produit);
+                }
             }
         }
-       
+    
         $commande = new Commande();
-
+    
         try {
             $paniers = $user->getPaniers();
-            foreach ($paniers as $key => $panier) {
-                if( $panier->getEtat() === 'en cours') {
+            foreach ($paniers as $panier) {
+                if ($panier->getEtat() === 'en cours') {
                     $panier->setLots($panier->getLots());
                     $panier->setEtat('terminé');
-
                     break;
                 }
             }
-            $date = new DateTime();
+    
+            date_default_timezone_set('Europe/Paris');
+            $date = new \DateTime();
             $reference = $this->commandeRepository->generateRandomReference();
             $commande->setClient($user);
             $commande->setReference($reference);
             $commande->setPanier($panier);
             $commande->setDateCommande($date);
-
+    
+            if (isset($newAdresse)) {
+                $commande->setAdresse($newAdresse);
+            }
+    
             $entityManager->persist($commande);
             $entityManager->persist($user);
             $entityManager->flush();
-
+    
             $orderDetails = [
                 'client' => $user->getIdClient(),
                 'reference' => $commande->getReference(),
@@ -472,8 +512,66 @@ try {
     
             return new JsonResponse(['success' => 'Commande enregistrée avec succès', 'commande' => $orderDetails]);
         } catch (\Exception $e) {
-            $entityManager->rollback();
             return new JsonResponse(['error' => $e->getMessage()], 500);
         }
     }
+    
+    
+
+    #[Route('/mesCommandes', name: 'app_mes_commandes')]
+    public function mesCommande(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->clientRepository->find(1);
+    
+        if (!$user) {
+            return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
+        }
+    
+        $commandes = $this->commandeRepository->findBy(['client' => $user], ['date_commande' => 'DESC']);
+        $commandesDetails = [];
+    
+        if (isset($commandes) && $commandes) {
+            $prix = 0;
+            foreach ($commandes as $commande) {
+                $panier = $commande->getPanier();
+                $panierLots = $panier->getLots();
+                foreach ($panierLots as $lots) {
+                    $prix += $lots['prix'];
+                }
+                $adresseCommande = $commande->getAdresse();
+                if ($adresseCommande !== null) {
+                    $adresse = [
+                        'nom' => $user->getNom(),
+                        'prenom' => $user->getPrenom(),
+                        'rue' => $adresseCommande->getRue() ?? '',
+                        'cp' => $adresseCommande->getCodePostal() ?? '',
+                        'ville' => $adresseCommande->getVille() ?? '',
+                        'pays' => $adresseCommande->getPays() ?? '',
+                        'telephone' => $user->getTelephone()
+                    ];
+                } else {
+                    $adresse = [
+                        'rue' => '',
+                        'cp' => '',
+                        'ville' => '',
+                        'pays' => '',
+                    ];
+                }
+                $commandesDetails[] = [
+                    'reference' => $commande->getReference(),
+                    'date_commande' => $commande->getDateCommande()->format('Y-m-d'),
+                    'nb_articles' => count($panierLots),
+                    'panier' => $panierLots,
+                    'adresse' => $adresse,
+                    'ttc' => $prix,
+                    'tva' => $prix * 0.2,
+                    'etat' => $commande->getEtat() 
+                ];  
+                $prix = 0;
+            }
+        }
+    
+        return new JsonResponse(['success' => $commandesDetails]);
+    }
+    
 }

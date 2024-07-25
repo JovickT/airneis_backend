@@ -26,12 +26,20 @@ class Commande
     #[ORM\JoinColumn(name: "id_panier", referencedColumnName: "id_panier")]
     private ?Panier $panier = null;
 
+    #[ORM\ManyToOne(targetEntity: Adresses::class)]
+    #[ORM\JoinColumn(name: "id_adresse", referencedColumnName: "id_adresse")]
+    private ?Adresses $adresse = null;
+
     #[ORM\Column(type: 'datetime')]
     private \DateTimeInterface $date_commande;
+
+    #[ORM\Column(length: 20)]
+    private ?string $etat = null;
 
     public function __construct()
     {
         $this->date_commande = new \DateTime();
+        $this->etat = 'En cours'; // Valeur par défaut
     }
 
     public function getIdCommande(): ?int
@@ -47,7 +55,6 @@ class Commande
     public function setReference(string $reference): self
     {
         $this->reference = $reference;
-
         return $this;
     }
 
@@ -59,7 +66,6 @@ class Commande
     public function setClient(?Client $client): self
     {
         $this->client = $client;
-
         return $this;
     }
 
@@ -71,7 +77,17 @@ class Commande
     public function setPanier(?Panier $panier): self
     {
         $this->panier = $panier;
+        return $this;
+    }
 
+    public function getAdresse(): ?Adresses
+    {
+        return $this->adresse;
+    }
+
+    public function setAdresse(?Adresses $adresse): self
+    {
+        $this->adresse = $adresse;
         return $this;
     }
 
@@ -83,7 +99,17 @@ class Commande
     public function setDateCommande(\DateTimeInterface $date_commande): self
     {
         $this->date_commande = $date_commande;
+        return $this;
+    }
 
+    public function getEtat(): ?string
+    {
+        return $this->etat;
+    }
+
+    public function setEtat(string $etat): self
+    {
+        $this->etat = $etat;
         return $this;
     }
 }
