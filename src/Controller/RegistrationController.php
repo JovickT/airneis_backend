@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Client;
+use App\Entity\Admin;
+use App\Form\AdminRegistrationFormType;
 use App\Form\RegistrationFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -40,6 +42,36 @@ class RegistrationController extends AbstractController
         }
 
         return $this->render('registration/register.html.twig', [
+            'registrationForm' => $form,
+        ]);
+    }
+
+    #[Route('/admin/register', name: 'app_admin_register')]
+    public function adminRegister(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager): Response
+    {
+        $admin = new Admin();
+        $admin->setRoles(['ROLE_ADMIN']);
+        $form = $this->createForm(AdminRegistrationFormType::class, $admin);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // encode the plain password
+            $admin->setPassword(
+                $userPasswordHasher->hashPassword(
+                    $admin,
+                    $form->get('plainPassword')->getData()
+                )
+            );
+
+            $entityManager->persist($admin);
+            $entityManager->flush();
+
+            // do anything else you need here, like send an email
+
+            // return $security->redirectToRoute('');
+        }
+
+        return $this->render('registration/admin.html.twig', [
             'registrationForm' => $form,
         ]);
     }

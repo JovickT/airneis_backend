@@ -36,3 +36,8 @@ filtre_data:
     path: /filtre
     controller: App\Controller\ApiController::filtre
     methods: [GET,POST]
+
+api_register:
+    path: /api/register
+    controller: App\Controller\ApiController::register
+    methods: [POST]

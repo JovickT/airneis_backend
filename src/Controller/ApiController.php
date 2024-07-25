@@ -270,7 +270,7 @@ class ApiController extends AbstractController
 
     
     #[Route('/api/register', name: 'api_register', methods: ['POST'])]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
+    public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -278,30 +278,30 @@ class ApiController extends AbstractController
         $form = $this->createForm(RegistrationFormType::class, $client);
         $form->submit($data);
 
-        if ($form->isValid()) {
-            // Encode the plain password
-            $client->setPassword(
-                $userPasswordHasher->hashPassword(
-                    $client,
-                    $form->get('plainPassword')->getData()
-                )
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Hachage du mot de passe
+            $hashedPassword = $passwordHasher->hashPassword(
+                $client,
+                $form->get('plainPassword')->getData()
             );
+            $client->setPassword($hashedPassword);
+
+            // Définir les rôles (par exemple, ROLE_USER)
+            $client->setRoles(['ROLE_USER']);
 
             $entityManager->persist($client);
             $entityManager->flush();
 
-            return $this->json([
-                'message' => 'User registered successfully'
-            ], Response::HTTP_CREATED);
+            return $this->json(['message' => 'Registration successful'], JsonResponse::HTTP_CREATED);
         }
 
-        return $this->json($form->getErrors(true, false), Response::HTTP_BAD_REQUEST);
+        // Collecter les erreurs de validation
+        $errors = [];
+        foreach ($form->getErrors(true) as $error) {
+            $errors[] = $error->getMessage();
+        }
+
+        return $this->json(['errors' => $errors], JsonResponse::HTTP_BAD_REQUEST);
     }
-       
-    #[Route('/api/csrf-token', name: 'api_csrf_token', methods: ['GET'])]
-    public function getCsrfToken(CsrfTokenManagerInterface $csrfTokenManager): JsonResponse
-    {
-        $token = $csrfTokenManager->getToken('authenticate')->getValue();
-        return new JsonResponse(['token' => $token]);
-    }
+
 }
