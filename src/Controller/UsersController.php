@@ -3,12 +3,18 @@
 namespace App\Controller;
 
 use App\Entity\Client;
-use App\Form\FormClientType;
-use App\Repository\ClientRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Form\FormClientType;
+use App\Form\UserProfileType;
+use App\Repository\ClientRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 class UsersController extends AbstractController
@@ -92,6 +98,64 @@ class UsersController extends AbstractController
         $entityManager->flush();
     
         return $this->redirectToRoute('app_users');
+    }
+
+    #[Route('/profile/edit', name: 'profile_edit')]
+    #[IsGranted('ROLE_USER')]
+    public function editpProfile(Request $request, EntityManagerInterface $entityManager, UserInterface $user): Response
+    {
+        $form = $this->createForm(UserProfileType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Profil mis à jour avec succès.');
+
+            return $this->redirectToRoute('profile_edit');
+        }
+
+        return $this->render('user/edit_profile.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/api/profile', name: 'api_profile_edit', methods: ['PUT'])]
+    public function editProfile(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        UserInterface $user, Security $security,
+        ValidatorInterface $validator,
+        SerializerInterface $serializer
+    ): JsonResponse
+    {
+        $user = $security->getUser();
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data) {
+            return new JsonResponse(['error' => 'Invalid JSON'], 400);
+        }
+
+        if (isset($data['prenom'])) $user->setPrenom($data['prenom']);
+        if (isset($data['nom'])) $user->setNom($data['nom']);
+        if (isset($data['email'])) $user->setEmail($data['email']);
+        if (isset($data['telephone'])) $user->setTelephone($data['telephone']);
+
+        $errors = $validator->validate($user);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return new JsonResponse(['errors' => $errorMessages], 400);
+        }
+
+        $entityManager->flush();
+
+        return new JsonResponse([
+            'message' => 'Profil mis à jour avec succès',
+            'user' => $serializer->normalize($user, null, ['groups' => 'user'])
+        ]);
     }
 
 }
