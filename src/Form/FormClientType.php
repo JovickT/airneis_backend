@@ -80,7 +80,6 @@ class FormClientType extends AbstractType
                     // Autres attributs HTML personnalisés
                 ],
             ])
-            ->add('adresse', FormAdresseType::class)
             ->add('save', SubmitType::class, ['label' => 'Ajouter']);
     }
     

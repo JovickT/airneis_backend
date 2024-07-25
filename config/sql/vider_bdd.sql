@@ -1,0 +1,15 @@
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE airneis.adresses;
+TRUNCATE TABLE airneis.carrousel;
+TRUNCATE TABLE airneis.categories;
+TRUNCATE TABLE airneis.client;
+TRUNCATE TABLE airneis.client_adresse;
+TRUNCATE TABLE airneis.commande;
+TRUNCATE TABLE airneis.image;
+TRUNCATE TABLE airneis.image_carrousel;
+TRUNCATE TABLE airneis.image_produit;
+TRUNCATE TABLE airneis.marques;
+TRUNCATE TABLE airneis.materiaux;
+TRUNCATE TABLE airneis.panier;
+TRUNCATE TABLE airneis.produits;
+SET FOREIGN_KEY_CHECKS = 1;

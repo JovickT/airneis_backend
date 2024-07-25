@@ -136,7 +136,7 @@ class HomeController extends AbstractController
                 ->setNom($nom)
                 ->setPrenom($prenom)
                 ->setTelephone($telephone)
-                ->setAdresse($adresse); // Attribuez l'adresse à l'utilisateur
+                ->addAdresse($adresse); // Attribuez l'adresse à l'utilisateur
     
             // Utilisez la méthode registration pour hacher le mot de passe et définissez-le sur l'utilisateur
             $hashedPassword = $this->registration($passwordHasher, $user, $plaintextPassword);

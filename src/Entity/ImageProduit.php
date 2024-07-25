@@ -12,43 +12,41 @@ class ImageProduit
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id_image_produit = null;
 
-    #[ORM\ManyToOne(targetEntity: Image::class)]
-    #[ORM\JoinColumn(nullable: false, referencedColumnName: "id_image")]
-    private ?Image $id_image = null;
+    #[ORM\ManyToOne(targetEntity: Image::class, inversedBy: 'imageProduits')]
+    #[ORM\JoinColumn(nullable: false, name: 'id_image', referencedColumnName: 'id_image')]
+    private ?Image $image = null;
 
-    #[ORM\ManyToOne(targetEntity: Produits::class)]
-    #[ORM\JoinColumn(nullable: false, referencedColumnName: "id_produit")]
-    private ?Produits $id_produit = null;
+    #[ORM\ManyToOne(targetEntity: Produits::class, inversedBy: 'produitImages')]
+    #[ORM\JoinColumn(nullable: false, name: 'id_produit', referencedColumnName: 'id_produit')]
+    private ?Produits $produit = null;
 
     public function getIdImageProduit(): ?int
     {
         return $this->id_image_produit;
     }
 
-    public function getIdImage(): ?Image
+    public function getProduit(): ?Produits
     {
-        return $this->id_image;
+        return $this->produit;
     }
 
-    public function setIdImage(?Image $id_image): self
+    public function setProduit(?Produits $produit): self
     {
-        $this->id_image = $id_image;
-
+        $this->produit = $produit;
         return $this;
     }
 
-    public function getIdProduit(): ?Produits
+    public function getImage(): ?Image
     {
-        return $this->id_produit;
+        return $this->image;
     }
 
-    public function setIdProduit(?Produits $id_produit): self
+    public function setImage(?Image $image): self
     {
-        $this->id_produit = $id_produit;
-
+        $this->image = $image;
         return $this;
     }
 }

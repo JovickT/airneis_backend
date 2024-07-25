@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ProduitsRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -29,21 +31,28 @@ class Produits
     #[ORM\Column]
     private ?int $quantite = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $date_creation = null;
 
     #[ORM\ManyToOne(targetEntity: Marques::class)]
     #[ORM\JoinColumn(name: "marque", referencedColumnName: "id")]
-    private $marque;
+    private ?Marques $marque = null;
 
     #[ORM\ManyToOne(targetEntity: Categories::class)]
     #[ORM\JoinColumn(name: "categorie", referencedColumnName: "id_categorie")]
-    private $categorie;
+    private ?Categories $categorie = null;
 
     #[ORM\ManyToOne(targetEntity: Materiaux::class)]
     #[ORM\JoinColumn(name: "materiaux", referencedColumnName: "id_materiel")]
-    private $materiaux;
+    private ?Materiaux $materiaux = null;
 
+    #[ORM\OneToMany(targetEntity: ImageProduit::class, mappedBy: 'produit')]
+    private Collection $produitImages;
+
+    public function __construct()
+    {
+        $this->produitImages = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -55,10 +64,9 @@ class Produits
         return $this->reference;
     }
 
-    public function setReference(string $reference): static
+    public function setReference(string $reference): self
     {
         $this->reference = $reference;
-
         return $this;
     }
 
@@ -67,10 +75,9 @@ class Produits
         return $this->nom;
     }
 
-    public function setNom(string $nom): static
+    public function setNom(string $nom): self
     {
         $this->nom = $nom;
-
         return $this;
     }
 
@@ -79,10 +86,9 @@ class Produits
         return $this->prix;
     }
 
-    public function setPrix(float $prix): static
+    public function setPrix(float $prix): self
     {
         $this->prix = $prix;
-
         return $this;
     }
 
@@ -91,10 +97,9 @@ class Produits
         return $this->description;
     }
 
-    public function setDescription(string $description): static
+    public function setDescription(string $description): self
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -103,10 +108,9 @@ class Produits
         return $this->quantite;
     }
 
-    public function setQuantite(int $quantite): static
+    public function setQuantite(int $quantite): self
     {
         $this->quantite = $quantite;
-
         return $this;
     }
 
@@ -115,10 +119,9 @@ class Produits
         return $this->date_creation;
     }
 
-    public function setDateCreation(\DateTimeInterface $date_creation): static
+    public function setDateCreation(\DateTimeInterface $date_creation): self
     {
         $this->date_creation = $date_creation;
-
         return $this;
     }
 
@@ -130,7 +133,6 @@ class Produits
     public function setMarque(?Marques $marque): self
     {
         $this->marque = $marque;
-
         return $this;
     }
 
@@ -142,7 +144,6 @@ class Produits
     public function setCategorie(?Categories $categorie): self
     {
         $this->categorie = $categorie;
-
         return $this;
     }
 
@@ -154,8 +155,34 @@ class Produits
     public function setMateriaux(?Materiaux $materiaux): self
     {
         $this->materiaux = $materiaux;
-
         return $this;
     }
 
+    /**
+     * @return Collection<int, ImageProduit>
+     */
+    public function getProduitImages(): Collection
+    {
+        return $this->produitImages;
+    }
+
+    public function addProduitImage(ImageProduit $produitImage): self
+    {
+        if (!$this->produitImages->contains($produitImage)) {
+            $this->produitImages->add($produitImage);
+            $produitImage->setProduit($this);
+        }
+        return $this;
+    }
+
+    public function removeProduitImage(ImageProduit $produitImage): self
+    {
+        if ($this->produitImages->removeElement($produitImage)) {
+            // set the owning side to null (unless already changed)
+            if ($produitImage->getProduit() === $this) {
+                $produitImage->setProduit(null);
+            }
+        }
+        return $this;
+    }
 }

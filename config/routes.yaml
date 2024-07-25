@@ -29,13 +29,28 @@ image_product:
 search_produits:
     path: /search
     controller: App\Controller\ApiController::searchProduits
-    methods: [GET]
+    methods: [POST,GET]
 
 
 filtre_data:
     path: /filtre
     controller: App\Controller\ApiController::filtre
     methods: [GET,POST]
+
+create_payment_intent:
+    path: /create-payment-intent
+    controller: App\Controller\ApiController::createPaymentIntent
+    methods: [POST]
+
+app_panier:
+    path: /panier
+    controller: App\Controller\ApiController::savePanier
+    methods: [POST,GET]
+
+app_commande:
+    path: /commande
+    controller: App\Controller\ApiController::commande
+
 
 api_register:
     path: /api/register

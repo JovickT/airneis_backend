@@ -54,9 +54,16 @@ class RechercheRepository extends ServiceEntityRepository
                 ->setParameter('description', '%' . $criteria['description'] . '%');
         }
 
-        if (isset($criteria['material'])) {
-            $qb->andWhere('p.material LIKE :material')
-                ->setParameter('material', '%' . $criteria['material'] . '%');
+        if (isset($criteria['material']) && !empty($criteria['material'])) {
+            $qb->innerJoin('p.materiaux', 'm')
+                ->andWhere('m.nom IN (:material)')
+                ->setParameter('material', $criteria['material']);
+        }
+
+        if (isset($criteria['category']) && !empty($criteria['category'])) {
+            $qb->innerJoin('p.categorie', 'c')
+                ->andWhere('c.nom IN (:category)')
+                ->setParameter('category', $criteria['category']);
         }
 
         if (isset($criteria['price_min'])) {
@@ -69,17 +76,11 @@ class RechercheRepository extends ServiceEntityRepository
                 ->setParameter('price_max', $criteria['price_max']);
         }
 
-        if (isset($criteria['category'])) {
-            $qb->innerJoin('p.categorie', 'c')
-                ->andWhere('c.nom = :category')
-                ->setParameter('category', $criteria['category']);
-        }
-
         if (isset($criteria['in_stock']) && $criteria['in_stock']) {
             $qb->andWhere('p.quantite > 0');
         }
 
-        // Add sorting
+        // Pas utilisé pour le moment
         if (isset($criteria['sort_by'])) {
             $sortBy = $criteria['sort_by'];
             $sortOrder = $criteria['sort_order'] ?? 'ASC';

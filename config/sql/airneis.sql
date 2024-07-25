@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le : jeu. 20 juin 2024 à 07:37
+-- Généré le : sam. 20 juil. 2024 à 23:02
 -- Version du serveur : 8.2.0
 -- Version de PHP : 8.2.13
 
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `adresses` (
   `code_postal` varchar(8) NOT NULL,
   `rue` varchar(100) NOT NULL,
   PRIMARY KEY (`id_adresse`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Déchargement des données de la table `adresses`
@@ -43,13 +43,7 @@ CREATE TABLE IF NOT EXISTS `adresses` (
 
 INSERT INTO `adresses` (`id_adresse`, `pays`, `ville`, `code_postal`, `rue`) VALUES
 (1, 'France', 'Bondaroy', '45300', '1 impasse des coquelicots'),
-(3, 'France', 'Evry', '91280', "2 rue de l'exemple"),
-(4, 'France', 'Mantes-la-jolie', '78256', '128 avenue du test'),
-(6, 'France', 'Paris', '75015', '45 boulevard de la paix'),
-(7, 'France', 'Palaiseau', '91120', '9 allée de louise bruneau'),
-(8, 'France', "L'Hay-les-roses", '94320', '132 rue de Bicêtre'),
-(9, 'France', "L'Hay-les-roses", '94320', '132 rue de Bicêtre'),
-(10, 'France', 'Palaiseau', '91120', '9 allée louise bruneau');
+
 
 -- --------------------------------------------------------
 
@@ -63,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `carrousel` (
   `page` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `quantite` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `carrousel`
@@ -84,7 +78,7 @@ CREATE TABLE IF NOT EXISTS `categories` (
   `id_categorie` int NOT NULL AUTO_INCREMENT,
   `nom` varchar(30) NOT NULL,
   PRIMARY KEY (`id_categorie`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Déchargement des données de la table `categories`
@@ -116,23 +110,62 @@ CREATE TABLE IF NOT EXISTS `client` (
   `email` varchar(80) NOT NULL,
   `mot_de_passe` varchar(255) NOT NULL,
   `telephone` varchar(15) NOT NULL,
-  `id_adresse` int DEFAULT NULL,
   `roles` json NOT NULL,
   PRIMARY KEY (`id_client`),
-  UNIQUE KEY `UNIQ_C7440455E7927C74` (`email`),
-  KEY `IDX_C74404551DC2A166` (`id_adresse`)
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4;
+  UNIQUE KEY `UNIQ_C7440455E7927C74` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Déchargement des données de la table `client`
 --
 
-INSERT INTO `client` (`id_client`, `prenom`, `nom`, `email`, `mot_de_passe`, `telephone`, `id_adresse`, `roles`) VALUES
-(31, 'Randy', 'Sapa', 'randy.sapa@gmail.com', '$2y$13$4VflHz7YtnzYNLbKUaFV5Om02yVhc0d11', '', 1, '[\"ROLE_ADMIN\"]'),
-(32, 'Jovick', 'Tchakala', 'jovick.tchakala@gmail.com', '$2y$13$mi1lblu9psMD5ttfSW18t.CaZm11ueHu9', '', 1, '[\"ROLE_ADMIN\"]'),
-(33, 'Mehdi', 'Triaa', 'mehdi.triaa@gmail.com', '$2y$13$mas.t7se0W2HYlQ7BAHCVuONb3bf8F9yk', '', 1, '[\"ROLE_ADMIN\"]'),
-(34, 'Emilien', 'Billaud', 'emilien.billaud@gmail.com', '$2y$13$Mee4DXlDKrxhRV4HcQZ8j.TZ4SLqRyDCn', '', 1, '[\"ROLE_ADMIN\"]'),
-(35, 'Chanel', 'Kulenga', 'kulenga.chanel@gmail.com', '$2y$13$nz5CJgZXzRnkz9MPZFcLxe8mH4NOkc9Os', '', 1, '[\"ROLE_USER\"]');
+INSERT INTO `client` (`id_client`, `prenom`, `nom`, `email`, `mot_de_passe`, `telephone`, `roles`) VALUES
+(40, 'mon', 'test', 'montest@xyz.fr', '$2y$13$mXtXc55a0bWXnRRDihqtru1geHNEJ1AhApZotwSOs5pjT5jc92CHW', '', '[\"ROLE_USER\"]'),
+(41, 'new', 'test', 'newtest@xyz.fr', '$2y$13$6ZluFqQAlcP1eeMObuRka.afE.m/58wQ5dvxRqvKQA7aWx7YhJ.zu', '', '[\"ROLE_USER\"]'),
+(42, 'Emilien', 'Billaud', 'emiliendtk@gmail.com', '$2y$10$VXcNGsXzQi7qlSpOD9ja/OLgKwS4RhSAed1ENv1QNWucqRHgXware', '', '[\"ROLE_ADMIN\"]');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `client_adresse`
+--
+
+DROP TABLE IF EXISTS `client_adresse`;
+CREATE TABLE IF NOT EXISTS `client_adresse` (
+  `client_id` int NOT NULL,
+  `adresse_id` int NOT NULL,
+  PRIMARY KEY (`client_id`,`adresse_id`),
+  KEY `IDX_91624C6B19EB6921` (`client_id`),
+  KEY `IDX_91624C6B4DE7DC5C` (`adresse_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `commande`
+--
+
+DROP TABLE IF EXISTS `commande`;
+CREATE TABLE IF NOT EXISTS `commande` (
+  `id_commande` int NOT NULL AUTO_INCREMENT,
+  `id_client` int DEFAULT NULL,
+  `id_panier` int DEFAULT NULL,
+  `reference` varchar(8) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `date_commande` datetime NOT NULL,
+  PRIMARY KEY (`id_commande`),
+  UNIQUE KEY `UNIQ_6EEAA67DAEA34913` (`reference`),
+  KEY `IDX_6EEAA67DE173B1B8` (`id_client`),
+  KEY `IDX_6EEAA67D2FBB81F` (`id_panier`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `commande`
+--
+
+INSERT INTO `commande` (`id_commande`, `id_client`, `id_panier`, `reference`, `date_commande`) VALUES
+(3, 40, 6, 'COMxbRUi', '2024-07-20 15:09:34'),
+(4, 40, 7, 'COMDd9Tj', '2024-07-20 16:28:00'),
+(5, 40, 23, 'COMZNnUK', '2024-07-20 22:51:28');
 
 -- --------------------------------------------------------
 
@@ -146,7 +179,7 @@ CREATE TABLE IF NOT EXISTS `doctrine_migration_versions` (
   `executed_at` datetime DEFAULT NULL,
   `execution_time` int DEFAULT NULL,
   PRIMARY KEY (`version`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 
 --
 -- Déchargement des données de la table `doctrine_migration_versions`
@@ -156,7 +189,20 @@ INSERT INTO `doctrine_migration_versions` (`version`, `executed_at`, `execution_
 ('DoctrineMigrations\\Version20240524123523', '2024-05-24 12:36:59', 1141),
 ('DoctrineMigrations\\Version20240525173615', '2024-05-25 17:36:42', 52),
 ('DoctrineMigrations\\Version20240525194655', '2024-05-25 19:47:16', 573),
-('DoctrineMigrations\\Version20240617131128', '2024-06-17 13:11:54', 183);
+('DoctrineMigrations\\Version20240617131128', '2024-06-17 13:11:54', 183),
+('DoctrineMigrations\\Version20240702125900', '2024-07-18 13:32:35', 121),
+('DoctrineMigrations\\Version20240702130600', '2024-07-18 13:54:19', 64),
+('DoctrineMigrations\\Version20240702133136', '2024-07-18 13:54:19', 19),
+('DoctrineMigrations\\Version20240703125012', '2024-07-18 13:54:19', 29),
+('DoctrineMigrations\\Version20240703185516', '2024-07-18 13:54:19', 25),
+('DoctrineMigrations\\Version20240703185751', '2024-07-18 13:54:19', 42),
+('DoctrineMigrations\\Version20240703191334', '2024-07-18 13:54:19', 28),
+('DoctrineMigrations\\Version20240715135241', '2024-07-18 13:54:19', 24),
+('DoctrineMigrations\\Version20240718130452', '2024-07-18 13:54:19', 275),
+('DoctrineMigrations\\Version20240718203134', '2024-07-18 20:31:53', 356),
+('DoctrineMigrations\\Version20240719093122', '2024-07-19 09:31:29', 51),
+('DoctrineMigrations\\Version20240719113112', '2024-07-19 11:31:22', 266),
+('DoctrineMigrations\\Version20240719191515', '2024-07-19 19:48:54', 320);
 
 -- --------------------------------------------------------
 
@@ -169,7 +215,7 @@ CREATE TABLE IF NOT EXISTS `image` (
   `id_image` int NOT NULL AUTO_INCREMENT,
   `lien` varchar(255) NOT NULL,
   PRIMARY KEY (`id_image`)
-) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Déchargement des données de la table `image`
@@ -249,7 +295,7 @@ CREATE TABLE IF NOT EXISTS `image_carousel` (
   PRIMARY KEY (`id`),
   KEY `IDX_9227C9A81AA511C9` (`carrousel_id`),
   KEY `IDX_9227C9A83DA5256D` (`image_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -260,18 +306,18 @@ CREATE TABLE IF NOT EXISTS `image_carousel` (
 DROP TABLE IF EXISTS `image_produit`;
 CREATE TABLE IF NOT EXISTS `image_produit` (
   `id_image_produit` int NOT NULL AUTO_INCREMENT,
-  `id_image_id` int NOT NULL,
-  `id_produit_id` int NOT NULL,
+  `id_image` int NOT NULL,
+  `id_produit` int NOT NULL,
   PRIMARY KEY (`id_image_produit`),
-  KEY `IDX_BCB5BBFB6D7EC9F8` (`id_image_id`),
-  KEY `IDX_BCB5BBFBAABEFE2C` (`id_produit_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb4;
+  KEY `IDX_BCB5BBFB2BB8456F` (`id_image`),
+  KEY `IDX_BCB5BBFBF7384557` (`id_produit`)
+) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Déchargement des données de la table `image_produit`
 --
 
-INSERT INTO `image_produit` (`id_image_produit`, `id_image_id`, `id_produit_id`) VALUES
+INSERT INTO `image_produit` (`id_image_produit`, `id_image`, `id_produit`) VALUES
 (1, 4, 6),
 (2, 5, 51),
 (3, 6, 7),
@@ -335,7 +381,7 @@ CREATE TABLE IF NOT EXISTS `marques` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nom` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Déchargement des données de la table `marques`
@@ -390,7 +436,7 @@ CREATE TABLE IF NOT EXISTS `materiaux` (
   `id_materiel` int NOT NULL AUTO_INCREMENT,
   `nom` varchar(50) NOT NULL,
   PRIMARY KEY (`id_materiel`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Déchargement des données de la table `materiaux`
@@ -428,7 +474,32 @@ CREATE TABLE IF NOT EXISTS `messenger_messages` (
   KEY `IDX_75EA56E0FB7336F0` (`queue_name`),
   KEY `IDX_75EA56E0E3BD61CE` (`available_at`),
   KEY `IDX_75EA56E016BA31DB` (`delivered_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `panier`
+--
+
+DROP TABLE IF EXISTS `panier`;
+CREATE TABLE IF NOT EXISTS `panier` (
+  `id_panier` int NOT NULL AUTO_INCREMENT,
+  `lots` json NOT NULL,
+  `date_creation` datetime NOT NULL,
+  `date_modification` datetime NOT NULL,
+  `etat` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `client_id` int NOT NULL,
+  PRIMARY KEY (`id_panier`),
+  KEY `FK_PANIER_CLIENT` (`client_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `panier`
+--
+
+INSERT INTO `panier` (`id_panier`, `lots`, `date_creation`, `date_modification`, `etat`, `client_id`) VALUES
+(23, '[{\"nom\": \"Table à manger en bois massif\", \"prix\": 349.99, \"image\": \"https://localhost:8000/uploads/images/300x300-60081e8ba86b535b5b4aac07fb838fce.png\", \"quantite\": 1, \"categorie\": \"Table\", \"description\": \"Table à manger robuste en bois massif avec une finition naturelle.\"}, {\"nom\": \"Table basse en marbre et laiton\", \"prix\": 349.99, \"image\": \"https://localhost:8000/uploads/images/300x300-effaae8f7fc3b1f43eaba43532f6b557.png\", \"quantite\": 1, \"categorie\": \"Table basse\", \"description\": \"Table basse en marbre blanc et laiton doré avec un design luxueux.\"}]', '2024-07-20 21:05:09', '2024-07-20 22:50:38', 'terminé', 40);
 
 -- --------------------------------------------------------
 
@@ -452,7 +523,7 @@ CREATE TABLE IF NOT EXISTS `produits` (
   KEY `IDX_BE2DDF8C497DD634` (`categorie`),
   KEY `IDX_BE2DDF8C5A6F91CE` (`marque`),
   KEY `IDX_BE2DDF8C97C56625` (`materiaux`)
-) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Déchargement des données de la table `produits`
@@ -460,14 +531,14 @@ CREATE TABLE IF NOT EXISTS `produits` (
 
 INSERT INTO `produits` (`id_produit`, `reference`, `nom`, `prix`, `description`, `quantite`, `date_creation`, `marque`, `categorie`, `materiaux`) VALUES
 (1, 'CAN1234', 'Canapé en cuir noir', 799.99, 'Canapé spacieux en cuir noir de haute qualité.', 20, '2024-04-13', 1, 1, 4),
-(2, 'CAN2345', 'Canapé d\'angle gris', 899.99, 'Canapé d\'angle moderne en tissu gris avec accoudoirs ajustables.', 15, '2024-04-13', 2, 1, 11),
+(2, 'CAN2345', "Canapé d'angle gris", 899.99, "Canapé d'angle moderne en tissu gris avec accoudoirs ajustables.", 15, '2024-04-13', 2, 1, 11),
 (3, 'CAN3456', 'Canapé convertible en tissu', 649.99, 'Canapé convertible pratique en tissu avec un mécanisme facile à utiliser.', 25, '2024-04-13', 3, 1, 5),
 (4, 'CAN4567', 'Canapé en cuir marron', 899.99, 'Canapé en cuir véritable de couleur marron avec des coutures décoratives.', 18, '2024-04-13', 4, 1, 4),
 (5, 'CAN5678', 'Canapé modulaire en tissu', 999.99, 'Canapé modulaire en tissu avec des modules interchangeables pour une configuration personnalisée.', 12, '2024-04-13', 5, 1, 5),
 (6, 'TAB1234', 'Table à manger en bois massif', 349.99, 'Table à manger robuste en bois massif avec une finition naturelle.', 15, '2024-04-13', 6, 2, 1),
 (7, 'TAB2345', 'Table basse rectangulaire', 199.99, 'Table basse rectangulaire avec un plateau en verre trempé et des pieds en métal.', 20, '2024-04-13', 7, 2, 8),
 (8, 'TAB3456', 'Table de cuisine ronde', 249.99, 'Table de cuisine ronde en bois avec un design moderne et des pieds en métal.', 18, '2024-04-13', 8, 2, 8),
-(9, 'TAB4567', 'Table d\'appoint en marbre', 159.99, 'Table d\'appoint élégante avec un plateau en marbre blanc et une base en métal doré.', 22, '2024-04-13', 9, 2, 7),
+(9, 'TAB4567', "Table d'appoint en marbre", 159.99, "Table d'appoint élégante avec un plateau en marbre blanc et une base en métal doré.", 22, '2024-04-13', 9, 2, 7),
 (10, 'TAB5678', 'Table console extensible', 499.99, "Table console extensible en bois avec une conception intelligente pour économiser de l'espace.", 10, '2024-04-13', 10, 2, 8),
 (11, 'CHA1234', 'Chaise de salle à manger en bois', 79.99, 'Chaise de salle à manger en bois avec un design simple et une assise confortable.', 30, '2024-04-13', 11, 3, 1),
 (12, 'CHA2345', 'Chaise de bureau ergonomique', 129.99, 'Chaise de bureau ergonomique avec un support lombaire réglable et des accoudoirs rembourrés.', 25, '2024-04-13', 12, 3, 2),
@@ -486,8 +557,8 @@ INSERT INTO `produits` (`id_produit`, `reference`, `nom`, `prix`, `description`,
 (25, 'ARM5678', 'Armoire de bureau en métal', 299.99, 'Armoire de bureau en métal avec des portes verrouillables pour sécuriser vos documents.', 10, '2024-04-13', 25, 5, 2),
 (26, 'BIB1234', 'Bibliothèque moderne à étagères', 299.99, 'Bibliothèque élégante avec des étagères réglables pour organiser vos livres et décorations.', 12, '2024-04-13', 26, 6, 8),
 (27, 'BIB2345', 'Bibliothèque murale en bois', 399.99, 'Bibliothèque murale en bois avec des étagères flottantes pour un look moderne.', 8, '2024-04-13', 27, 6, 1),
-(28, 'BIB3456', "Bibliothèque d'angle en métal", 249.99, "Bibliothèque d'angle en métal avec des étagères en verre pour un design contemporain.', 10, '2024-04-13', 28, 6, 2),
-(29, 'BIB4567', 'Bibliothèque encastrée', 599.99, 'Bibliothèque encastrée sur mesure avec des étagères intégrées pour un rangement élégant.", 6, '2024-04-13', 29, 6, 10),
+(28, 'BIB3456', "Bibliothèque d'angle en métal", 249.99, "Bibliothèque d'angle en métal avec des étagères en verre pour un design contemporain.", 10, '2024-04-13', 28, 6, 2),
+(29, 'BIB4567', 'Bibliothèque encastrée', 599.99, 'Bibliothèque encastrée sur mesure avec des étagères intégrées pour un rangement élégant.', 6, '2024-04-13', 29, 6, 10),
 (30, 'BIB5678', 'Bibliothèque industrielle à roulettes', 349.99, 'Bibliothèque industrielle avec des étagères en bois et une structure en métal robuste.', 15, '2024-04-13', 30, 6, 10),
 (31, 'COM1234', 'Commode vintage en bois', 199.99, 'Commode vintage en bois avec des tiroirs spacieux pour le rangement.', 18, '2024-04-13', 31, 7, 1),
 (32, 'COM2345', 'Commode à tiroirs en métal', 149.99, 'Commode à tiroirs en métal avec des poignées en cuir pour un look industriel.', 15, '2024-04-13', 32, 7, 2),
@@ -516,10 +587,18 @@ INSERT INTO `produits` (`id_produit`, `reference`, `nom`, `prix`, `description`,
 --
 
 --
--- Contraintes pour la table `client`
+-- Contraintes pour la table `client_adresse`
 --
-ALTER TABLE `client`
-  ADD CONSTRAINT `FK_C74404551DC2A166` FOREIGN KEY (`id_adresse`) REFERENCES `adresses` (`id_adresse`);
+ALTER TABLE `client_adresse`
+  ADD CONSTRAINT `FK_91624C6B19EB6921` FOREIGN KEY (`client_id`) REFERENCES `client` (`id_client`),
+  ADD CONSTRAINT `FK_91624C6B4DE7DC5C` FOREIGN KEY (`adresse_id`) REFERENCES `adresses` (`id_adresse`);
+
+--
+-- Contraintes pour la table `commande`
+--
+ALTER TABLE `commande`
+  ADD CONSTRAINT `FK_6EEAA67D2FBB81F` FOREIGN KEY (`id_panier`) REFERENCES `panier` (`id_panier`),
+  ADD CONSTRAINT `FK_6EEAA67DE173B1B8` FOREIGN KEY (`id_client`) REFERENCES `client` (`id_client`);
 
 --
 -- Contraintes pour la table `image_carousel`
@@ -532,8 +611,14 @@ ALTER TABLE `image_carousel`
 -- Contraintes pour la table `image_produit`
 --
 ALTER TABLE `image_produit`
-  ADD CONSTRAINT `FK_BCB5BBFB6D7EC9F8` FOREIGN KEY (`id_image`) REFERENCES `image` (`id_image`),
-  ADD CONSTRAINT `FK_BCB5BBFBAABEFE2C` FOREIGN KEY (`id_produit`) REFERENCES `produits` (`id_produit`);
+  ADD CONSTRAINT `FK_BCB5BBFB2BB8456F` FOREIGN KEY (`id_image`) REFERENCES `image` (`id_image`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_BCB5BBFBF7384557` FOREIGN KEY (`id_produit`) REFERENCES `produits` (`id_produit`) ON DELETE CASCADE;
+
+--
+-- Contraintes pour la table `panier`
+--
+ALTER TABLE `panier`
+  ADD CONSTRAINT `FK_PANIER_CLIENT` FOREIGN KEY (`client_id`) REFERENCES `client` (`id_client`) ON DELETE CASCADE;
 
 --
 -- Contraintes pour la table `produits`
