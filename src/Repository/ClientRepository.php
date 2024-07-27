@@ -91,5 +91,11 @@ class ClientRepository extends ServiceEntityRepository
             return $emailList;
         }
 
+        public function save(Client $client): void
+        {
+            $entityManager = $this->getEntityManager();
+            $entityManager->persist($client);
+            $entityManager->flush();
+        }
 
 }

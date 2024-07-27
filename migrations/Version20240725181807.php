@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20240724153846 extends AbstractMigration
+final class Version20240725181807 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -22,6 +22,7 @@ final class Version20240724153846 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE `admin` CHANGE roles roles JSON NOT NULL');
         $this->addSql('ALTER TABLE client CHANGE roles roles JSON NOT NULL');
+        $this->addSql('ALTER TABLE panier CHANGE lots lots JSON NOT NULL');
         $this->addSql('ALTER TABLE messenger_messages CHANGE delivered_at delivered_at DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
     }
 
@@ -31,5 +32,6 @@ final class Version20240724153846 extends AbstractMigration
         $this->addSql('ALTER TABLE `admin` CHANGE roles roles LONGTEXT NOT NULL COLLATE `utf8mb4_bin`');
         $this->addSql('ALTER TABLE client CHANGE roles roles LONGTEXT NOT NULL COLLATE `utf8mb4_bin`');
         $this->addSql('ALTER TABLE messenger_messages CHANGE delivered_at delivered_at DATETIME DEFAULT \'NULL\' COMMENT \'(DC2Type:datetime_immutable)\'');
+        $this->addSql('ALTER TABLE panier CHANGE lots lots LONGTEXT NOT NULL COLLATE `utf8mb4_bin`');
     }
 }

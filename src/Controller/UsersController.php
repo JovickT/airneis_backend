@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Client;
+use App\Entity\Adresses;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\FormClientType;
 use App\Form\UserProfileType;
@@ -14,17 +15,22 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
+
 
 class UsersController extends AbstractController
 {
 
     private $clientRepository;
+    private $passwordHasher;
 
 
-    public function __construct(private EntityManagerInterface $entityManager, ClientRepository $clientRepository) {
+    public function __construct(private EntityManagerInterface $entityManager, ClientRepository $clientRepository,UserPasswordHasherInterface $passwordHasher) {
         $this->clientRepository = $clientRepository;
+        $this->passwordHasher = $passwordHasher;
        
     }
 
@@ -120,28 +126,119 @@ class UsersController extends AbstractController
         ]);
     }
 
-    #[Route('/api/profile', name: 'api_profile_edit', methods: ['PUT'])]
-    public function editProfile(
-        Request $request,
-        EntityManagerInterface $entityManager,
-        UserInterface $user, Security $security,
-        ValidatorInterface $validator,
-        SerializerInterface $serializer
-    ): JsonResponse
+    #[Route('/api/update-user', name: 'api_profile_edit', methods: ['PUT'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function editProfile(Request $request, Security $security): Response
     {
-        $user = $security->getUser();
         $data = json_decode($request->getContent(), true);
+        $user = $security->getUser();
 
-        if (!$data) {
-            return new JsonResponse(['error' => 'Invalid JSON'], 400);
+        if (!$user) {
+            return new JsonResponse(['message' => 'User not found'], 404);
         }
 
-        if (isset($data['prenom'])) $user->setPrenom($data['prenom']);
-        if (isset($data['nom'])) $user->setNom($data['nom']);
-        if (isset($data['email'])) $user->setEmail($data['email']);
-        if (isset($data['telephone'])) $user->setTelephone($data['telephone']);
+        $client = $this->clientRepository->find($user->getIdClient());
 
-        $errors = $validator->validate($user);
+        if (!$client) {
+            return new JsonResponse(['message' => 'Client not found'], 404);
+        }
+
+        if (isset($data['prenom'])) {
+            $client->setPrenom($data['prenom']);
+        }
+        if (isset($data['nom'])) {
+            $client->setNom($data['nom']);
+        }
+        if (isset($data['email'])) {
+            $client->setEmail($data['email']);
+        }
+        if (isset($data['telephone'])) {
+            $client->setTelephone($data['telephone']);
+        }
+
+        $this->clientRepository->save($client);
+        return new JsonResponse([
+            'message' => 'Profile successfully updated',
+            'client' => [
+                'prenom' => $client->getPrenom(),
+                'nom' => $client->getNom(),
+                'email' => $client->getEmail(),
+                'telephone' => $client->getTelephone(),
+            ]
+        ], 200);
+    }
+
+    #[Route('/api/change-password', name: 'api_change_password', methods: ['POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function changePassword(Request $request, UserPasswordHasherInterface $passwordHasher, Security $security): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $user = $security->getUser();
+
+        if (!$user) {
+            return new JsonResponse(['message' => 'User not found'], 404);
+        }
+
+        $client = $this->clientRepository->find($user->getIdClient());
+
+        if (!$client) {
+            return new JsonResponse(['message' => 'Client not found'], 404);
+        }
+
+        // Vérifier le mot de passe actuel
+        if (!$passwordHasher->isPasswordValid($user, $data['currentPassword'])) {
+            return new JsonResponse(['message' => 'Current password is incorrect'], 400);
+        }
+
+        // Vérifier que les nouveaux mots de passe correspondent
+        if ($data['newPassword'] !== $data['repeatNewPassword']) {
+            return new JsonResponse(['message' => 'New passwords do not match'], 400);
+        }
+
+        // Hasher et définir le nouveau mot de passe
+        $hashedPassword = $passwordHasher->hashPassword($user, $data['newPassword']);
+        $client->setPassword($hashedPassword);
+        $this->clientRepository->save($client);
+        
+        return new JsonResponse(['message' => 'Le mot de passe a été modifié'], 200);
+    }
+
+    #[Route('/api/delete-account', name: 'api_delete_account', methods: ['DELETE'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function deleteAccount(Request $request, Security $security): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $user = $security->getUser();
+
+        if (!$user) {
+            return new JsonResponse(['message' => 'User not found'], 404);
+        }
+
+        $client = $this->clientRepository->find($user->getIdClient());
+
+        if (!$client) {
+            return new JsonResponse(['message' => 'Client not found'], 404);
+        }
+
+        $this->entityManager->remove($client);
+        $this->entityManager->flush();
+
+        
+        return new JsonResponse(['message' => 'Le compte a bien été supprimé'], 200);
+    }
+
+
+    #[Route('/api/adresses', name: 'api_adresses', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function Adresses(Request $request, EntityManagerInterface $entityManager, Security $security, ValidatorInterface $validator, SerializerInterface $serializer): JsonResponse
+    {
+
+        $user = $security->getUser();
+        $client = $this->clientRepository->find($user->getIdClient()); // Assurez-vous que cette méthode existe
+
+        $adresses = $client->getAdresses(); 
+
+        $errors = $validator->validate($adresses);
         if (count($errors) > 0) {
             $errorMessages = [];
             foreach ($errors as $error) {
@@ -150,12 +247,36 @@ class UsersController extends AbstractController
             return new JsonResponse(['errors' => $errorMessages], 400);
         }
 
-        $entityManager->flush();
-
-        return new JsonResponse([
-            'message' => 'Profil mis à jour avec succès',
-            'user' => $serializer->normalize($user, null, ['groups' => 'user'])
-        ]);
+        return new JsonResponse(['success' => $adresses]);
     }
 
+    #[Route('/api/add-adresse', name: 'api_adresse_create', methods: ['POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function createAdresse(Request $request, EntityManagerInterface $entityManager, Security $security, ValidatorInterface $validator): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $user = $security->getUser();
+        $client = $this->clientRepository->find($user->getIdClient()); // Assurez-vous que cette méthode existe
+
+        $adresse = new Adresses();
+        $adresse->setPays($data['pays']);
+        $adresse->setVille($data['ville']);
+        $adresse->setCodePostal($data['codePostal']);
+        $adresse->setRue($data['rue']);
+
+        $errors = $validator->validate($adresse);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return new JsonResponse(['errors' => $errorMessages], 400);
+        }
+
+        $client->addAdresse($adresse);
+        $entityManager->persist($adresse);
+        $entityManager->flush();
+
+        return new JsonResponse(['message' => 'Adresse créée avec succès', 'id' => $adresse->getId()], 201);
+    }
 }

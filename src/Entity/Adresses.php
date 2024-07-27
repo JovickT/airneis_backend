@@ -4,6 +4,10 @@ namespace App\Entity;
 
 use App\Repository\AdressesRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+
 
 #[ORM\Entity(repositoryClass: AdressesRepository::class)]
 class Adresses
@@ -11,18 +15,23 @@ class Adresses
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['adresse'])]
     private ?int $id_adresse = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['adresse'])]
     private ?string $pays = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['adresse'])]
     private ?string $ville = null;
 
     #[ORM\Column(length: 8)]
+    #[Groups(['adresse'])]
     private ?string $code_postal = null;
 
     #[ORM\Column(length: 100)]
+    #[Groups(['adresse'])]
     private ?string $rue = null;
 
     public function getId(): ?int

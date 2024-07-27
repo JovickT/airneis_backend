@@ -51,8 +51,3 @@ app_commande:
     path: /commande
     controller: App\Controller\ApiController::commande
 
-
-api_register:
-    path: /api/register
-    controller: App\Controller\ApiController::register
-    methods: [POST]
