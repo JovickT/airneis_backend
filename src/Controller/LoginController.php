@@ -29,7 +29,7 @@ class LoginController extends AbstractController
     #[Route('api/login_check', name : 'api_login_check',methods: ['POST'])]
     public function loginCheck(AuthenticationUtils $authenticationUtils): JsonResponse
     {
-        return new JsonResponse(['message' => 'Login successful'], 200);
+        return $this->json(['message' => 'Registration successful'], 200);
     }
 
     #[Route('/api/logout', name: 'api_logout', methods: ['POST'])]
