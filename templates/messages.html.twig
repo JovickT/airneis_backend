@@ -1,0 +1,25 @@
+{# templates/messages.html.twig #}
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+  <div class="accordion" id="accordionMassage">
+    {% for message in messages %}
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="heading{{ loop.index }}">
+          <button class="accordion-button {{ not loop.first ? 'collapsed' : '' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="{{ loop.first ? 'true' : 'false' }}" aria-controls="collapse{{ loop.index }}">
+            <div class="d-flex justify-content-between w-50">
+              <span class="date flex-grow-1" style="color: blue;">{{ message.date|date('Y-m-d H:i:s') }}</span>
+
+              <span class="email " style="color: green;">{{ message.email }}</span>
+            </div>
+          </button>
+        </h2>
+        <div id="collapse{{ loop.index }}" class="accordion-collapse collapse {{ loop.first ? 'show' : '' }}" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#accordionMassage">
+          <div class="accordion-body">
+            <p class="message" style="color: purple;">{{ message.message }}</p>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

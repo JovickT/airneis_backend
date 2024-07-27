@@ -7,6 +7,7 @@ use App\Entity\ImageCarousel;
 use App\Repository\CarrouselRepository;
 use App\Entity\Client;
 use App\Entity\Commande;
+use App\Entity\Contact;
 use App\Entity\Panier;
 use App\Form\RegistrationFormType;
 use App\Repository\AdressesRepository;
@@ -572,6 +573,29 @@ try {
         }
     
         return new JsonResponse(['success' => $commandesDetails]);
+    }
+
+    #[Route('/contact', name: 'app_contact')]
+    public function messages(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+
+        $data = json_decode($request->getContent(), true);
+    
+        if (is_null($data)) {
+            return new JsonResponse(['error' => 'Données invalides'], 400);
+        }
+
+        $contact = new Contact();
+        $contact->setNom($data['nom']);
+        $contact->setPrenom($data['prenom']);
+        $contact->setEmail($data['email']);
+        $contact->setMessage($data['message']);
+
+        $entityManager->persist($contact);
+        $entityManager->flush();
+
+        return new JsonResponse(['success' => 'Message envoyé avec succès']);
+
     }
     
 }

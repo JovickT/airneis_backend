@@ -50,3 +50,11 @@ app_panier:
 app_commande:
     path: /commande
     controller: App\Controller\ApiController::commande
+
+app_contact:
+    path: /contact
+    controller: App\Controller\ApiController::messages
+    methods: ['POST']
+app_the_message:
+    path: /theMessage/{id}
+    controller: App\Controller\HomeController::show
