@@ -36,6 +36,12 @@ class SecurityController extends AbstractController
         ]);
     }
 
+    #[Route(path: '/', name: 'app_index')]
+    public function original(AuthenticationUtils $authenticationUtils): Response
+    {
+        return $this->login($authenticationUtils);
+    }
+
     #[Route(path: '/logout', name: 'app_logout')]
     public function logout(): void
     {
