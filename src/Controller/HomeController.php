@@ -7,9 +7,11 @@ use App\Entity\Carrousel;
 use App\Entity\Client;
 use App\Entity\ImageCarousel;
 use App\Form\FormClientType;
+use App\Form\MessageFormType;
 use App\Repository\AdressesRepository;
 use App\Repository\CarrouselRepository;
 use App\Repository\ClientRepository;
+use App\Repository\ContactRepository;
 use App\Repository\ImageCarouselRepository;
 use App\Repository\ImageRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,6 +21,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class HomeController extends AbstractController
@@ -27,6 +32,7 @@ class HomeController extends AbstractController
     private $adresseRepository;
     private $imageRepository;
     private $carrouselRepository;
+    private $contactRepository;
     // private $imageCarrouselRepository;
     
     public function __construct(
@@ -35,12 +41,14 @@ class HomeController extends AbstractController
         AdressesRepository $adresseRepository,
         ImageRepository $imageRepository,
         CarrouselRepository $carrouselRepository,
+        ContactRepository $contactRepository,
         // ImageCarouselRepository $imageCarrouselRepository,
     ) {
         $this->clientRepository = $clientRepository;
         $this->adresseRepository = $adresseRepository;
         $this->imageRepository = $imageRepository;
         $this->carrouselRepository = $carrouselRepository;
+        $this->contactRepository = $contactRepository;
         // $this->imageCarrouselRepository = $imageCarrouselRepository;
     }
 
@@ -190,7 +198,7 @@ class HomeController extends AbstractController
             $page = $this ->carrouselRepository->find(['page' => $pageGet]);
             $image = $this ->imageRepository->find(['lien' => $imageGet]);
 
-            dd($page);
+            // dd($page);
             $imageCarrousel = new ImageCarousel();
 
         
@@ -212,4 +220,54 @@ class HomeController extends AbstractController
             'carrousel' => $tabCarrousels
         ]);
     }
+
+    #[Route('/allMessages', name: 'app_all_messages')]
+    public function allMessages(): Response
+    {
+        return $this->render('messages.html.twig', [
+            'controller_name' => 'HomeController',
+        ]);
+    }
+
+    #[Route('/theMessage/{id}', name: 'app_the_message')]
+    public function show(Request $request, $id, MailerInterface $mailer): Response
+    {
+        $message = $this->contactRepository->find($id);
+
+        $form = $this->createForm(MessageFormType::class, [
+            'email' => $message->getEmail(),
+            'message' => $message->getMessage()
+        ]);
+
+        $form->handleRequest($request);
+
+        
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+
+            $response = $data['response'];
+            $to = $data['email'];
+            
+            $email = (new Email())
+                ->from('admin@gmail.com')
+                ->to($to)
+                ->subject('Réponse à votre email')
+                ->text($response);
+
+            try {
+                $mailer->send($email);
+                $this->addFlash('success', 'Email envoyé avec succès!');
+            } catch (TransportExceptionInterface $e) {
+                $this->addFlash('error', 'Erreur lors de l\'envoi de l\'email : ' . $e->getMessage());
+            }
+
+            return $this->redirectToRoute('app_the_message', ['id' => $id]);
+        }
+
+        return $this->render('response.html.twig', [
+            'form' => $form->createView(),
+            'message' => $message
+        ]);
+    }
+    
 }

@@ -7,6 +7,7 @@ use App\Entity\ImageCarousel;
 use App\Repository\CarrouselRepository;
 use App\Entity\Client;
 use App\Entity\Commande;
+use App\Entity\Contact;
 use App\Entity\Panier;
 use App\Form\RegistrationFormType;
 use App\Repository\AdressesRepository;
@@ -25,13 +26,17 @@ use DateTime;
 use Stripe\PaymentIntent;
 use Stripe\Stripe;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+
 
 class ApiController extends AbstractController
 {
@@ -75,7 +80,7 @@ class ApiController extends AbstractController
         $this->adresseRepository = $adresseRepository;
     }
 
-    #[Route('/data', name: 'frontend_data')]
+    #[Route('/api/data', name: 'frontend_data')]
     public function fetchData(): JsonResponse
     {
         // Logique pour récupérer les données et les renvoyer
@@ -87,7 +92,7 @@ class ApiController extends AbstractController
         ]);
     }
 
-    #[Route('/filtre', name: 'filtre_data')]
+    #[Route('/api/filtre', name: 'filtre_data')]
     public function filtre(): JsonResponse
     {
         // Logique pour récupérer les données et les renvoyer
@@ -98,7 +103,7 @@ class ApiController extends AbstractController
         ]);
     }
 
-    #[Route('/categories', name: 'ProductOfCategorie_data')]
+    #[Route('/api/categories', name: 'ProductOfCategorie_data')]
     public function ProductOfCategorie(Request $request): JsonResponse
     {
        // Récupérer le paramètre de requête
@@ -147,7 +152,7 @@ class ApiController extends AbstractController
 
     }
 
-    #[Route('/produits', name: 'Product_data')]
+    #[Route('/api/produits', name: 'Product_data')]
     public function ProductData(Request $request): JsonResponse
     {
        // Récupérer le paramètre de requête
@@ -204,7 +209,7 @@ class ApiController extends AbstractController
         ]);
     }
 
-    #[Route('/search', name: 'search_produits', methods: ["POST", "GET"])]
+    #[Route('/api/search', name: 'search_produits', methods: ["POST", "GET"])]
     public function searchProduits(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -212,7 +217,7 @@ class ApiController extends AbstractController
         if (is_null($data)) {
             return new JsonResponse(['error' => 'Données invalides'], 400);
         }
-
+        
         $criteria = [
             "in_stock"=>$data["stock"],
             "price_max"=>$data["maxPrice"],
@@ -248,8 +253,9 @@ class ApiController extends AbstractController
         return $this->json($resultat, 200, [
             'Access-Control-Allow-Origin' => '*'
         ]);
-
+        
     }
+
 
 
 
@@ -297,7 +303,7 @@ class ApiController extends AbstractController
 
     
     #[Route('/api/register', name: 'api_register', methods: ['POST'])]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
+    public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -305,31 +311,30 @@ class ApiController extends AbstractController
         $form = $this->createForm(RegistrationFormType::class, $client);
         $form->submit($data);
 
-        if ($form->isValid()) {
-            // Encode the plain password
-            $client->setPassword(
-                $userPasswordHasher->hashPassword(
-                    $client,
-                    $form->get('plainPassword')->getData()
-                )
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Hachage du mot de passe
+            $hashedPassword = $passwordHasher->hashPassword(
+                $client,
+                $form->get('plainPassword')->getData()
             );
+            $client->setPassword($hashedPassword);
+
+            // Définir les rôles (par exemple, ROLE_USER)
+            $client->setRoles(['ROLE_USER']);
 
             $entityManager->persist($client);
             $entityManager->flush();
 
-            return $this->json([
-                'message' => 'User registered successfully'
-            ], Response::HTTP_CREATED);
+            return $this->json(['message' => 'Registration successful'], JsonResponse::HTTP_CREATED);
         }
 
-        return $this->json($form->getErrors(true, false), Response::HTTP_BAD_REQUEST);
-    }
-       
-    #[Route('/api/csrf-token', name: 'api_csrf_token', methods: ['GET'])]
-    public function getCsrfToken(CsrfTokenManagerInterface $csrfTokenManager): JsonResponse
-    {
-        $token = $csrfTokenManager->getToken('authenticate')->getValue();
-        return new JsonResponse(['token' => $token]);
+        // Collecter les erreurs de validation
+        $errors = [];
+        foreach ($form->getErrors(true) as $error) {
+            $errors[] = $error->getMessage();
+        }
+
+        return $this->json(['errors' => $errors], JsonResponse::HTTP_BAD_REQUEST);
     }
 
     #[Route('/create-payment-intent', name: 'create_payment_intent', methods: ['POST'])]
@@ -352,142 +357,159 @@ class ApiController extends AbstractController
         }
     }
 
-    #[Route('/panier', name: 'app_panier', methods: ['POST','GET'])]
-    public function savePanier(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    #[Route('/api/panier', name: 'app_panier', methods: ['POST','GET'])]
+    public function savePanier(Request $request, EntityManagerInterface $entityManager, Security $security): JsonResponse
     {
         $data = json_decode($request->query->get('test'), true);
-        // $data = json_decode($request->query->get('user'), true);
+        $user = json_decode($request->query->get('user'), true);
+        
+
         if (is_null($data)) {
             return new JsonResponse(['error' => 'Données invalides'], 400);
         }
 
         // $repoU = $data['user'] ?? null;
 
-        // if (!isset($repoU['email'])) {
-        //     return new JsonResponse(['error' => 'Email non fourni'], 400);
-        // }
-
-        $user = $this->clientRepository->find(1);
-
-if (!$user) {
-    return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
-}
-
-$monPanier = $user->getPaniers(); // Récupère tous les paniers de l'utilisateur
-$panierEnCours = null;
-
-// Recherchez le panier "en cours"
-foreach ($monPanier as $panier) {
-    if ($panier->getEtat() === 'en cours') {
-        $panierEnCours = $panier;
-        break;
-    }
-}
-
-try {
-    $entityManager->beginTransaction();
-
-    if ($panierEnCours) {
-        // Si un panier "en cours" existe, mettez-le à jour
-        $panierEnCours->setLots($data);
-        $panierEnCours->setDateModification(new \DateTime());
-        // dd($panierEnCours);
-    } else {
-        // Sinon, créez un nouveau panier
-        $panier = new Panier();
-        $panier->setLots($data);
-        $panier->setClient($user);
-        $user->addPanier($panier);
-        $entityManager->persist($panier);
-    }
-
-    $entityManager->persist($user);
-    $entityManager->flush();
-    $entityManager->commit();
-
-    return new JsonResponse(['success' => $data]);
-} catch (\Exception $e) {
-    $entityManager->rollback();
-    return new JsonResponse(['error' => $e->getMessage()], 500);
-}
-    }
-
-    #[Route('/commande', name: 'app_commande', methods: ['GET','POST'])]
-    public function commande(Request $request, EntityManagerInterface $entityManager): JsonResponse
-    {
-
-        $data = json_decode($request->getContent(), true);
-        
-        if (is_null($data)) {
-            dd($data);
-            return new JsonResponse(['error' => 'Données invalides'], 400);
+        if (is_null($user)) {
+            return new JsonResponse(['error' => 'Email non fourni'], 400);
         }
 
-        // $repoU = json_decode($data['user'], true);
-        $repoL = json_decode($data['livraison'], true);
+        $email = $user['email'];
 
-        // if (!isset($repoU['email'])) {
-        //     return new JsonResponse(['error' => 'Email non fourni'], 400);
-        // }
-    
-        $user = $this ->clientRepository->find(40);
+        $client = $this->clientRepository->findOneBy(['email' => $email]);
 
-
-        if (!$user) {
-            return new JsonResponse(['error' => 'Utilisateur non authentifié:'. $user], 401);
+        if (!$client) {
+            return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
         }
 
-        if(isset($repoL['saveLivraison']) && $repoL['saveLivraison']){
-            $rue = $repoL['adresse1'];
-            $cp = $repoL['cp'];
-            $ville = $repoL['ville'];
-            $pays = $repoL['pays'];
+        $monPanier = $client->getPaniers(); // Récupère tous les paniers de l'utilisateur
+        $panierEnCours = null;
 
-            $check = $this->adresseRepository->findOneByAddress($rue,$cp,$ville,$pays);
-            if(!isset($check)){
-                $newAdresse = new Adresses();
-                $newAdresse->setRue($rue);
-                $newAdresse->setCodePostal($cp);
-                $newAdresse->setVille($ville);
-                $newAdresse->setPays($pays);
-                $entityManager->persist($newAdresse);
-                $user->addAdresse($newAdresse);
-            }
-
-            $panier = $repoL['panier'];
-
-            foreach ($panier as $key => $value) {
-                $produit = $this->produitRepository->findOneBy(['nom' => $value['nom']]);
-                $newQuantite = $produit->getQuantite() - $value['quantite'];
-                $produit->setQuantite($newQuantite);
-
-                $entityManager->persist($produit);
+        // Recherchez le panier "en cours"
+        foreach ($monPanier as $panier) {
+            if ($panier->getEtat() === 'en cours') {
+                $panierEnCours = $panier;
+                break;
             }
         }
-       
-        $commande = new Commande();
 
         try {
+            $entityManager->beginTransaction();
+            date_default_timezone_set('Europe/Paris');
+            if ($panierEnCours) {
+                // Si un panier "en cours" existe, mettez-le à jour
+                $panierEnCours->setLots($data);
+                $panierEnCours->setDateModification(new \DateTime());
+                // dd($panierEnCours);
+            } else {
+                // Sinon, créez un nouveau panier
+                
+                $panier = new Panier();
+                $panier->setLots($data);
+                $panier->setClient($client);
+                $client->addPanier($panier);
+                $entityManager->persist($panier);
+            }
+
+            $entityManager->persist($client);
+            $entityManager->flush();
+            $entityManager->commit();
+
+            return new JsonResponse(['success' => $data]);
+        } catch (\Exception $e) {
+            $entityManager->rollback();
+            return new JsonResponse(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    #[Route('/api/commande', name: 'app_commande')]
+    public function commande(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        // dd($data);
+    
+        if (is_null($data)) {
+            return new JsonResponse(['error' => 'Données invalides'], 400);
+        }
+        $repoL = $data['livraison'];
+        $user = $this->clientRepository->find(1);
+    
+        if (!$user) {
+            return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
+        }
+
+        $rue = $repoL['adresse1'];
+        $cp = $repoL['cp'];
+        $ville = $repoL['ville'];
+        $pays = $repoL['pays'];
+
+    
+        $check = $this->adresseRepository->findOneByAddress($rue, $cp, $ville, $pays);
+
+        if(!$check){
+            $newAdresse = new Adresses();
+            $newAdresse->setRue($rue);
+            $newAdresse->setCodePostal($cp);
+            $newAdresse->setVille($ville);
+            $newAdresse->setPays($pays);
+            $entityManager->persist($newAdresse);
+            $entityManager->flush();
+        }else{
+            $newAdresse = $this->adresseRepository->find($check->getId()); 
+        }
+      
+
+        if(isset($repoL['saveLivraison']) && $repoL['saveLivraison']) {
+           
+            if (!$check) {
+                // Flush here to ensure the address is persisted before use
+                $user->addAdresse($newAdresse);
+            }
+    
+            if (isset($repoL['telephone']) && $repoL['telephone']) {
+                $user->setTelephone($repoL['telephone']);
+            }
+    
+            $panier = $repoL['panier'];
+    
+            foreach ($panier as $value) {
+                $produit = $this->produitRepository->findOneBy(['nom' => $value['nom']]);
+                if ($produit) {
+                    $newQuantite = $produit->getQuantite() - $value['quantite'];
+                    $produit->setQuantite($newQuantite);
+                    $entityManager->persist($produit);
+                }
+            }
+        }
+    
+        $commande = new Commande();
+    
+        try {
             $paniers = $user->getPaniers();
-            foreach ($paniers as $key => $panier) {
-                if( $panier->getEtat() === 'en cours') {
+            foreach ($paniers as $panier) {
+                if ($panier->getEtat() === 'en cours') {
                     $panier->setLots($panier->getLots());
                     $panier->setEtat('terminé');
-
                     break;
                 }
             }
-            $date = new DateTime();
+    
+            date_default_timezone_set('Europe/Paris');
+            $date = new \DateTime();
             $reference = $this->commandeRepository->generateRandomReference();
             $commande->setClient($user);
             $commande->setReference($reference);
             $commande->setPanier($panier);
             $commande->setDateCommande($date);
-
+    
+            if (isset($newAdresse)) {
+                $commande->setAdresse($newAdresse);
+            }
+    
             $entityManager->persist($commande);
             $entityManager->persist($user);
             $entityManager->flush();
-
+    
             $orderDetails = [
                 'client' => $user->getIdClient(),
                 'reference' => $commande->getReference(),
@@ -497,8 +519,127 @@ try {
     
             return new JsonResponse(['success' => 'Commande enregistrée avec succès', 'commande' => $orderDetails]);
         } catch (\Exception $e) {
-            $entityManager->rollback();
             return new JsonResponse(['error' => $e->getMessage()], 500);
         }
     }
+    
+    
+
+    #[Route('/api/mesCommandes', name: 'app_mes_commandes')]
+    public function mesCommande(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->clientRepository->find(1);
+    
+        if (!$user) {
+            return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
+        }
+    
+        $commandes = $this->commandeRepository->findBy(['client' => $user], ['date_commande' => 'DESC']);
+        $commandesDetails = [];
+    
+        if (isset($commandes) && $commandes) {
+            $prix = 0;
+            foreach ($commandes as $commande) {
+                $panier = $commande->getPanier();
+                $panierLots = $panier->getLots();
+                foreach ($panierLots as $lots) {
+                    $prix += $lots['prix'];
+                }
+                $adresseCommande = $commande->getAdresse();
+                if ($adresseCommande !== null) {
+                    $adresse = [
+                        'nom' => $user->getNom(),
+                        'prenom' => $user->getPrenom(),
+                        'rue' => $adresseCommande->getRue() ?? '',
+                        'cp' => $adresseCommande->getCodePostal() ?? '',
+                        'ville' => $adresseCommande->getVille() ?? '',
+                        'pays' => $adresseCommande->getPays() ?? '',
+                        'telephone' => $user->getTelephone()
+                    ];
+                } else {
+                    $adresse = [
+                        'rue' => '',
+                        'cp' => '',
+                        'ville' => '',
+                        'pays' => '',
+                    ];
+                }
+                $commandesDetails[] = [
+                    'reference' => $commande->getReference(),
+                    'date_commande' => $commande->getDateCommande()->format('Y-m-d'),
+                    'nb_articles' => count($panierLots),
+                    'panier' => $panierLots,
+                    'adresse' => $adresse,
+                    'ttc' => $prix,
+                    'tva' => $prix * 0.2,
+                    'etat' => $commande->getEtat() 
+                ];  
+                $prix = 0;
+            }
+        }
+    
+        return new JsonResponse(['success' => $commandesDetails]);
+    }
+
+    #[Route('/api/contact', name: 'app_contact')]
+    public function messages(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+
+        $data = json_decode($request->getContent(), true);
+    
+        if (is_null($data)) {
+            return new JsonResponse(['error' => 'Données invalides'], 400);
+        }
+
+        $contact = new Contact();
+        $contact->setNom($data['nom']);
+        $contact->setPrenom($data['prenom']);
+        $contact->setEmail($data['email']);
+        $contact->setMessage($data['message']);
+
+        $entityManager->persist($contact);
+        $entityManager->flush();
+
+        return new JsonResponse(['success' => 'Message envoyé avec succès']);
+
+    }
+
+    #[Route('/api/forgotPassword', name: 'app_forgotPassword', methods: ['POST'])]
+    public function forgotPassword(Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (is_null($data)) {
+            return new JsonResponse(['error' => 'Données invalides'], 400);
+        }
+
+        $user = $this->clientRepository->findOneBy(['email' => $data['email']]);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
+        }
+
+        $newPassword = $this->clientRepository->generatePassword();
+        $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        $email = (new Email())
+            ->from('admin@gmail.com')
+            ->to($user->getEmail())
+            ->subject('Réinitialisation de votre mot de passe')
+            ->text('Votre nouveau mot de passe est : ' . $newPassword);
+
+        try {
+            $user->setPassword($passwordHash);
+            $entityManager->persist($user);
+            $entityManager->flush();
+            $mailer->send($email);
+            return new JsonResponse(['success' => 'Email envoyé avec succès'], 200);
+        } catch (TransportExceptionInterface $e) {
+            return new JsonResponse(['error' => 'Échec de l\'envoi de l\'email'], 500);
+        }
+    }
+
+
+    
+    
 }

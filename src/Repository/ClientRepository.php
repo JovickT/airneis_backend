@@ -91,5 +91,34 @@ class ClientRepository extends ServiceEntityRepository
             return $emailList;
         }
 
+        public function save(Client $client): void
+        {
+            $entityManager = $this->getEntityManager();
+            $entityManager->persist($client);
+            $entityManager->flush();
+        }
+
+        public function generatePassword($length = 8) {
+            $uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            $lowercase = 'abcdefghijklmnopqrstuvwxyz';
+            $digits = '0123456789';
+        
+            // Ensure at least one character from each character set is included
+            $password = '';
+            $password .= $uppercase[random_int(0, strlen($uppercase) - 1)];
+            $password .= $lowercase[random_int(0, strlen($lowercase) - 1)];
+            $password .= $digits[random_int(0, strlen($digits) - 1)];
+        
+            // Fill the remaining length with a random selection of characters from all sets
+            $allCharacters = $uppercase . $lowercase . $digits;
+            for ($i = 3; $i < $length; $i++) {
+                $password .= $allCharacters[random_int(0, strlen($allCharacters) - 1)];
+            }
+        
+            // Shuffle the password to ensure randomness
+            $password = str_shuffle($password);
+        
+            return $password;
+        }
 
 }

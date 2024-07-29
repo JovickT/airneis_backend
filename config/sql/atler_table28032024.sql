@@ -270,7 +270,7 @@ INSERT INTO image_produit (id_image, id_produit) VALUES
     (52, 50)
 
 INSERT INTO image_produit (id_image, id_produit) VALUES (4, 6);
--- INSERT INTO image_produit (id_image, id_produit) VALUES (5, 51);
+INSERT INTO image_produit (id_image, id_produit) VALUES (5, 51);
 INSERT INTO image_produit (id_image, id_produit) VALUES (6, 7);
 INSERT INTO image_produit (id_image, id_produit) VALUES (11, 9);
 INSERT INTO image_produit (id_image, id_produit) VALUES (10, 10);
