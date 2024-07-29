@@ -204,10 +204,15 @@ class ApiController extends AbstractController
         ]);
     }
 
-    #[Route('/search', name: 'search_produits')]
+    #[Route('/search', name: 'search_produits', methods: ["POST", "GET"])]
     public function searchProduits(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
+
+        if (is_null($data)) {
+            return new JsonResponse(['error' => 'Données invalides'], 400);
+        }
+
         $criteria = [
             "in_stock"=>$data["stock"],
             "price_max"=>$data["maxPrice"],
@@ -223,7 +228,7 @@ class ApiController extends AbstractController
         $table=[];
         $resultat=[];
         foreach ($data as $key => $value) {
-            $res = $this->imageProduitRepository->findOneBy(["id_produit" => $value->getId()]);
+            $res = $this->imageProduitRepository->findOneBy(["produit" => $value]);
 
             $table=["nom" => $value -> getNom(),
             "prix" => $value -> getPrix(),
@@ -233,7 +238,7 @@ class ApiController extends AbstractController
             'dateCreation' => $value -> getDateCreation()->format('Y-m-d H:i:s')
 
             ];
-            $image = $res->getIdImage();
+            $image = $this->imageRepository->find($res);
             $table['image'][] = 'https://localhost:8000/uploads/'.$image->getLien();
 
             $resultat[]=$table;
@@ -243,7 +248,7 @@ class ApiController extends AbstractController
         return $this->json($resultat, 200, [
             'Access-Control-Allow-Origin' => '*'
         ]);
-        
+
     }
 
 
@@ -362,7 +367,7 @@ class ApiController extends AbstractController
         //     return new JsonResponse(['error' => 'Email non fourni'], 400);
         // }
 
-        $user = $this->clientRepository->find(40);
+        $user = $this->clientRepository->find(1);
 
 if (!$user) {
     return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
