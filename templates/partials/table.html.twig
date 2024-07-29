@@ -9,7 +9,9 @@
             
             <div class="my-3" style="text-align: end">
                 {% if app.request.attributes.get('_route') == 'app_users' %}
-                    <a href="{{ path('app_form_client') }}"><button class="btn btn-primary">Ajouter utilisateur</button></a>
+                    <a href="{{ path('app_form_client') }}"><button class="btn btn-primary">Ajouter un utilisateur</button></a>
+                {% elseif app.request.attributes.get('_route') == 'app_admin' %}
+                    <a href="{{ path('app_form_admin') }}"><button class="btn btn-primary">Ajouter un admin</button></a>
                 {% elseif app.request.attributes.get('_route') == 'app_produit' %}
                     <a href="{{ path('app_form_produit') }}"><button class="btn btn-primary">Ajouter un produit</button></a>
                 {% elseif app.request.attributes.get('_route') == 'app_marque' %}
@@ -61,6 +63,13 @@
                                     <td><a href="{{ path('app_form_users_upd', {'email': row["email"]}) }}" class="btn btn-primary" >MODIFIER</button></a>
                                     <td>
                                         <form id="deleteForm{{ loop.index }}" action="{{ path('app_form_users_delete', { 'email': row["email"] }) }}" method="post">
+                                            <button type="submit" class="btn btn-danger">Supprimer</button>
+                                        </form>
+                                    </td>
+                                {% elseif app.request.attributes.get('_route') == 'app_admin' %}
+                                    <td><a href="{{ path('app_form_admin_upd', {'email': row["email"]}) }}" class="btn btn-primary" >MODIFIER</button></a>
+                                    <td>
+                                        <form id="deleteForm{{ loop.index }}" action="{{ path('app_form_admin_delete', { 'email': row["email"] }) }}" method="post">
                                             <button type="submit" class="btn btn-danger">Supprimer</button>
                                         </form>
                                     </td>

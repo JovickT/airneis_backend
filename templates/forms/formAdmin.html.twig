@@ -1,0 +1,83 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+
+{% if form_errors(form) %}
+    <div class="alert alert-danger">
+        {{ form_errors(form) }}
+    </div>
+{% endif %}
+
+{# Affichage des erreurs du champ password.first #}
+{% if form.password is defined %}
+    {% if form_errors(form.password.first) %}
+        <div class="alert alert-danger">
+            {{ form_errors(form.password.first) }}
+        </div>
+    {% endif %}
+
+    {# Affichage des erreurs du champ password.second #}
+    {% if form_errors(form.password.second) %}
+        <div class="alert alert-danger">
+            {{ form_errors(form.password.second) }}
+        </div>
+    {% endif %}
+{% endif %}
+  
+<div class="container-fluid px-1 py-5 mx-auto">
+    <div class="row d-flex justify-content-center">
+        <div class="col-xl-7 col-lg-8 col-md-9 col-11 text-center">
+            <h3 class="mb-3">{{ title }}</h3>
+            <div class="card">
+                <h5 class="text-center my-4">Formulaire de Admin</h5>
+                <form class="form-card p-3" method="post">
+                    {% block form_fields %}
+                        <div class="row justify-content-between text-left">
+                            <div class="form-group col-sm-6 flex-column d-flex"> 
+                                <label class="form-control-label px-3">{{ form_label(form.prenom) }}<span class="text-danger"> *</span></label> 
+                                {{ form_widget(form.prenom, { 'attr': {'class': 'form-control', 'placeholder': 'Enter your first name'} }) }}
+                            </div>
+                            <div class="form-group col-sm-6 flex-column d-flex"> 
+                                <label class="form-control-label px-3">{{ form_label(form.nom) }}<span class="text-danger"> *</span></label> 
+                                {{ form_widget(form.nom, { 'attr': {'class': 'form-control', 'placeholder': 'Enter your last name'} }) }}
+                            </div>
+                        </div>
+                        <div class="row justify-content-between text-left">
+                            <div class="form-group col-sm-6 flex-column d-flex"> 
+                                <label class="form-control-label px-3">{{ form_label(form.email) }}<span class="text-danger"> *</span></label> 
+                                {{ form_widget(form.email, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
+                            </div>
+                        </div>
+                        
+                       {% if title == "Nouvel administrateur" %}
+                            <div class="row justify-content-between text-left">
+                                <div class="form-group col-sm-6 flex-column d-flex"> 
+                                    <label class="form-control-label px-3">{{ form_label(form.password.first) }}<span class="text-danger"> *</span></label> 
+                                    {{ form_widget(form.password.first, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
+                                </div>
+                                <div class="form-group col-sm-6 flex-column d-flex"> 
+                                    <label class="form-control-label px-3">{{ form_label(form.password.second) }}<span class="text-danger"> *</span></label> 
+                                    {{ form_widget(form.password.second, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
+                                </div>
+                            </div>
+
+                        {% endif %}
+
+                        <div class="form-group col-sm-6 d-flex flex-column"> 
+                            <label class="form-control-label d-flex">{{ form_label(form.roles) }}<span class="text-danger"> *</span></label> 
+                            {{ form_widget(form.roles, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
+                        </div>
+                    {% endblock %}
+                    <div class="row justify-content-end">
+                        <div class="form-group col-sm-6"> 
+                            <button type="submit" class="btn-block btn-primary">Ajouter</button> 
+                        </div>
+                    </div>
+    
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
