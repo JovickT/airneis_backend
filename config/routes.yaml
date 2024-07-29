@@ -51,3 +51,16 @@ app_commande:
     path: /api/commande
     controller: App\Controller\ApiController::commande
 
+app_contact:
+    path: /api/contact
+    controller: App\Controller\ApiController::messages
+    methods: ['POST']
+
+app_the_message:
+    path: /theMessage/{id}
+    controller: App\Controller\HomeController::show
+
+app_forgotPassword:
+    path: /api/forgotPassword
+    controller: App\Controller\ApiController::forgotPassword
+    methods: ['POST']

@@ -7,6 +7,7 @@ use App\Entity\ImageCarousel;
 use App\Repository\CarrouselRepository;
 use App\Entity\Client;
 use App\Entity\Commande;
+use App\Entity\Contact;
 use App\Entity\Panier;
 use App\Form\RegistrationFormType;
 use App\Repository\AdressesRepository;
@@ -25,9 +26,14 @@ use DateTime;
 use Stripe\PaymentIntent;
 use Stripe\Stripe;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -352,64 +358,68 @@ class ApiController extends AbstractController
     }
 
     #[Route('/api/panier', name: 'app_panier', methods: ['POST','GET'])]
-    public function savePanier(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    public function savePanier(Request $request, EntityManagerInterface $entityManager, Security $security): JsonResponse
     {
         $data = json_decode($request->query->get('test'), true);
-        // $data = json_decode($request->query->get('user'), true);
+        $user = json_decode($request->query->get('user'), true);
+        
+
         if (is_null($data)) {
             return new JsonResponse(['error' => 'Données invalides'], 400);
         }
 
         // $repoU = $data['user'] ?? null;
 
-        // if (!isset($repoU['email'])) {
-        //     return new JsonResponse(['error' => 'Email non fourni'], 400);
-        // }
+        if (is_null($user)) {
+            return new JsonResponse(['error' => 'Email non fourni'], 400);
+        }
 
-        $user = $this->clientRepository->find(1);
+        $email = $user['email'];
 
-if (!$user) {
-    return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
-}
+        $client = $this->clientRepository->findOneBy(['email' => $email]);
 
-$monPanier = $user->getPaniers(); // Récupère tous les paniers de l'utilisateur
-$panierEnCours = null;
+        if (!$client) {
+            return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
+        }
 
-// Recherchez le panier "en cours"
-foreach ($monPanier as $panier) {
-    if ($panier->getEtat() === 'en cours') {
-        $panierEnCours = $panier;
-        break;
-    }
-}
+        $monPanier = $client->getPaniers(); // Récupère tous les paniers de l'utilisateur
+        $panierEnCours = null;
 
-try {
-    $entityManager->beginTransaction();
-    date_default_timezone_set('Europe/Paris');
-    if ($panierEnCours) {
-        // Si un panier "en cours" existe, mettez-le à jour
-        $panierEnCours->setLots($data);
-        $panierEnCours->setDateModification(new \DateTime());
-        // dd($panierEnCours);
-    } else {
-        // Sinon, créez un nouveau panier
-        
-        $panier = new Panier();
-        $panier->setLots($data);
-        $panier->setClient($user);
-        $user->addPanier($panier);
-        $entityManager->persist($panier);
-    }
+        // Recherchez le panier "en cours"
+        foreach ($monPanier as $panier) {
+            if ($panier->getEtat() === 'en cours') {
+                $panierEnCours = $panier;
+                break;
+            }
+        }
 
-    $entityManager->persist($user);
-    $entityManager->flush();
-    $entityManager->commit();
+        try {
+            $entityManager->beginTransaction();
+            date_default_timezone_set('Europe/Paris');
+            if ($panierEnCours) {
+                // Si un panier "en cours" existe, mettez-le à jour
+                $panierEnCours->setLots($data);
+                $panierEnCours->setDateModification(new \DateTime());
+                // dd($panierEnCours);
+            } else {
+                // Sinon, créez un nouveau panier
+                
+                $panier = new Panier();
+                $panier->setLots($data);
+                $panier->setClient($client);
+                $client->addPanier($panier);
+                $entityManager->persist($panier);
+            }
 
-    return new JsonResponse(['success' => $data]);
-} catch (\Exception $e) {
-    $entityManager->rollback();
-    return new JsonResponse(['error' => $e->getMessage()], 500);
-}
+            $entityManager->persist($client);
+            $entityManager->flush();
+            $entityManager->commit();
+
+            return new JsonResponse(['success' => $data]);
+        } catch (\Exception $e) {
+            $entityManager->rollback();
+            return new JsonResponse(['error' => $e->getMessage()], 500);
+        }
     }
 
     #[Route('/api/commande', name: 'app_commande')]
@@ -570,5 +580,66 @@ try {
     
         return new JsonResponse(['success' => $commandesDetails]);
     }
+
+    #[Route('/api/contact', name: 'app_contact')]
+    public function messages(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+
+        $data = json_decode($request->getContent(), true);
+    
+        if (is_null($data)) {
+            return new JsonResponse(['error' => 'Données invalides'], 400);
+        }
+
+        $contact = new Contact();
+        $contact->setNom($data['nom']);
+        $contact->setPrenom($data['prenom']);
+        $contact->setEmail($data['email']);
+        $contact->setMessage($data['message']);
+
+        $entityManager->persist($contact);
+        $entityManager->flush();
+
+        return new JsonResponse(['success' => 'Message envoyé avec succès']);
+
+    }
+
+    #[Route('/api/forgotPassword', name: 'app_forgotPassword', methods: ['POST'])]
+    public function forgotPassword(Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (is_null($data)) {
+            return new JsonResponse(['error' => 'Données invalides'], 400);
+        }
+
+        $user = $this->clientRepository->findOneBy(['email' => $data['email']]);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
+        }
+
+        $newPassword = $this->clientRepository->generatePassword();
+        $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        $email = (new Email())
+            ->from('admin@gmail.com')
+            ->to($user->getEmail())
+            ->subject('Réinitialisation de votre mot de passe')
+            ->text('Votre nouveau mot de passe est : ' . $newPassword);
+
+        try {
+            $user->setPassword($passwordHash);
+            $entityManager->persist($user);
+            $entityManager->flush();
+            $mailer->send($email);
+            return new JsonResponse(['success' => 'Email envoyé avec succès'], 200);
+        } catch (TransportExceptionInterface $e) {
+            return new JsonResponse(['error' => 'Échec de l\'envoi de l\'email'], 500);
+        }
+    }
+
+
+    
     
 }
