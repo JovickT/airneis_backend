@@ -74,7 +74,7 @@ class ApiController extends AbstractController
         $this->adresseRepository = $adresseRepository;
     }
 
-    #[Route('/data', name: 'frontend_data')]
+    #[Route('/api/data', name: 'frontend_data')]
     public function fetchData(): JsonResponse
     {
         // Logique pour récupérer les données et les renvoyer
@@ -86,7 +86,7 @@ class ApiController extends AbstractController
         ]);
     }
 
-    #[Route('/filtre', name: 'filtre_data')]
+    #[Route('/api/filtre', name: 'filtre_data')]
     public function filtre(): JsonResponse
     {
         // Logique pour récupérer les données et les renvoyer
@@ -97,7 +97,7 @@ class ApiController extends AbstractController
         ]);
     }
 
-    #[Route('/categories', name: 'ProductOfCategorie_data')]
+    #[Route('/api/categories', name: 'ProductOfCategorie_data')]
     public function ProductOfCategorie(Request $request): JsonResponse
     {
        // Récupérer le paramètre de requête
@@ -146,7 +146,7 @@ class ApiController extends AbstractController
 
     }
 
-    #[Route('/produits', name: 'Product_data')]
+    #[Route('/api/produits', name: 'Product_data')]
     public function ProductData(Request $request): JsonResponse
     {
        // Récupérer le paramètre de requête
@@ -203,7 +203,7 @@ class ApiController extends AbstractController
         ]);
     }
 
-    #[Route('/search', name: 'search_produits', methods: ["POST", "GET"])]
+    #[Route('/api/search', name: 'search_produits', methods: ["POST", "GET"])]
     public function searchProduits(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -331,7 +331,7 @@ class ApiController extends AbstractController
         return $this->json(['errors' => $errors], JsonResponse::HTTP_BAD_REQUEST);
     }
 
-    #[Route('/create-payment-intent', name: 'create_payment_intent', methods: ['POST'])]
+    #[Route('/api/create-payment-intent', name: 'create_payment_intent', methods: ['POST'])]
     public function createPaymentIntent(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -351,7 +351,7 @@ class ApiController extends AbstractController
         }
     }
 
-    #[Route('/panier', name: 'app_panier', methods: ['POST','GET'])]
+    #[Route('/api/panier', name: 'app_panier', methods: ['POST','GET'])]
     public function savePanier(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->query->get('test'), true);
@@ -412,7 +412,7 @@ try {
 }
     }
 
-    #[Route('/commande', name: 'app_commande')]
+    #[Route('/api/commande', name: 'app_commande')]
     public function commande(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -515,7 +515,7 @@ try {
     
     
 
-    #[Route('/mesCommandes', name: 'app_mes_commandes')]
+    #[Route('/api/mesCommandes', name: 'app_mes_commandes')]
     public function mesCommande(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $user = $this->clientRepository->find(1);

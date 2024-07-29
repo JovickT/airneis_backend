@@ -9,45 +9,45 @@ api_login_check:
     methods: [POST]
     
 frontend_data:
-    path: /data
+    path: /api/data
     controller: App\Controller\ApiController::fetchData
     methods: [GET, POST, DELETE]
 ProductOfCategorie_data:
-    path: /categories
+    path: /api/categories
     controller: App\Controller\ApiController::ProductOfCategorie
     methods: [GET]
 Product_data:
-    path: /produits
+    path: /api/produits
     controller: App\Controller\ApiController::ProductData
     methods: [GET]
 image_product:
-    path: /ip
+    path: /api/ip
     controller: App\Controller\ApiController::imageofProduct
     methods: [GET,POST]
 
 
 search_produits:
-    path: /search
+    path: /api/search
     controller: App\Controller\ApiController::searchProduits
     methods: [POST,GET]
 
 
 filtre_data:
-    path: /filtre
+    path: /api/filtre
     controller: App\Controller\ApiController::filtre
     methods: [GET,POST]
 
 create_payment_intent:
-    path: /create-payment-intent
+    path: /api/create-payment-intent
     controller: App\Controller\ApiController::createPaymentIntent
     methods: [POST]
 
 app_panier:
-    path: /panier
+    path: /api/panier
     controller: App\Controller\ApiController::savePanier
     methods: [POST,GET]
 
 app_commande:
-    path: /commande
+    path: /api/commande
     controller: App\Controller\ApiController::commande
 
