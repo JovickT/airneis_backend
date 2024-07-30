@@ -41,13 +41,24 @@ Avant de commencer, assurez-vous d'avoir installé les outils suivants sur votre
 
    php bin/console doctrine:fixtures:load
 
+6. **Installer le certificat SSL**
+
+   Pour configurer le serveur avec un certificat SSL local, exécutez la commande suivante :
+   
+   symfony server:ca:install
+   
+
 **Démarrer le BackOffice**
 
   Pour lancer le back-office, utilisez la commande suivante :
 
   symfony server:start
 
-  Cela démarrera le serveur Symfony et vous permettra d'accéder à l'interface d'administration via votre navigateur. Pour ce connecter, utiliser l'identifiant : admin@example.com 
+   Cela démarrera le serveur de développement et vous pourrez ouviri l'application dans le navigateur de votre choix. Vous pouvez accéder à l'application à l'adresse       
+   https://localhost:8000 (par défaut).
+
+  Cela démarrera le serveur Symfony et vous permettra d'accéder à l'interface d'administration via votre navigateur. Pour ce connecter, utiliser l'identifiant :       
+  admin@example.com 
   et le mot de passe: admin123
 
 **Fonctionnalités**
