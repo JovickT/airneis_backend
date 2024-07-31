@@ -48,10 +48,10 @@ Avant de commencer, assurez-vous d'avoir installé les outils suivants sur votre
    symfony server:ca:install
    
 
-##Démarrer le BackOffice
+## Démarrer le BackOffice
 
   Pour lancer le back-office, utilisez la commande suivante :
-   ```bash
+  ```bash
   symfony server:start
 
    Cela démarrera le serveur de développement et vous pourrez ouviri l'application dans le navigateur de votre choix. Vous pouvez accéder à l'application à l'adresse       
@@ -61,20 +61,20 @@ Avant de commencer, assurez-vous d'avoir installé les outils suivants sur votre
   admin@example.com 
   et le mot de passe: admin123
 
-##Fonctionnalités
+Fonctionnalités
 
   Le BackOffice permet aux administrateurs de :
 
   Interagir avec la partie client du site.
   Accéder à des données personnelles et des statistiques relatives aux utilisateurs et à leur activité.
 
-##Contributions
+## Contributions
 
   Les contributions sont les bienvenues ! Pour proposer des améliorations ou des corrections, veuillez suivre les instructions de contribution dans le dépôt GitHub.
 
-##Licence
+## Licence
 
-##Contact
+## Contact
 
   Pour toute question ou support, veuillez contacter contact@airneis.com ou ouvrir une issue sur le dépôt GitHub.
   
