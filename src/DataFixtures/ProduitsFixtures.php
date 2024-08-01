@@ -13,10 +13,26 @@ class ProduitsFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
-        // Récupération des entités associées
-        $categories = $manager->getRepository(Categories::class)->findAll();
-        $marques = $manager->getRepository(Marques::class)->findAll();
-        $materiaux = $manager->getRepository(Materiaux::class)->findAll();
+         // Récupération des entités associées
+    $categories = $manager->getRepository(Categories::class)->findAll();
+    $marques = $manager->getRepository(Marques::class)->findAll();
+    $materiaux = $manager->getRepository(Materiaux::class)->findAll();
+
+    // Créer des tableaux associatifs indexés par les identifiants
+    $categoriesById = [];
+    foreach ($categories as $categorie) {
+        $categoriesById[$categorie->getIdCategorie()] = $categorie;
+    }
+
+    $marquesById = [];
+    foreach ($marques as $marque) {
+        $marquesById[$marque->getId()] = $marque;
+    }
+
+    $materiauxById = [];
+    foreach ($materiaux as $materiel) {
+        $materiauxById[$materiel->getIdMateriel()] = $materiel;
+    }
 
         // Les données des produits
         $produitsData = [
@@ -81,22 +97,22 @@ class ProduitsFixtures extends Fixture
             $produit->setDescription($description);
             $produit->setQuantite($quantite);
             $produit->setDateCreation(new \DateTime($date_creation));
-
+    
             // Associer la marque
-            $marque = $marques[array_search($marqueRef, array_column($marques, 'id'))] ?? null;
+            $marque = $marquesById[$marqueRef] ?? null;
             $produit->setMarque($marque);
-
+    
             // Associer la catégorie
-            $categorie = $categories[array_search($categorieRef, array_column($categories, 'id_categorie'))] ?? null;
+            $categorie = $categoriesById[$categorieRef] ?? null;
             $produit->setCategorie($categorie);
-
+    
             // Associer le matériau
-            $materiauxEntity = $materiaux[array_search($materiauxRef, array_column($materiaux, 'id_materiel'))] ?? null;
+            $materiauxEntity = $materiauxById[$materiauxRef] ?? null;
             $produit->setMateriaux($materiauxEntity);
-
+    
             $manager->persist($produit);
         }
-
+    
         $manager->flush();
     }
 }

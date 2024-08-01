@@ -51,10 +51,17 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'client', targetEntity: Panier::class, cascade: ['persist', 'remove'])]
     private Collection $paniers;
 
+    #[ORM\OneToMany(mappedBy: 'client', targetEntity: PaymentMethod::class, cascade: ['persist', 'remove'])]
+    private Collection $paymentMethods;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $stripeCustomerId = null;
+    
     public function __construct()
     {
         $this->adresses = new ArrayCollection();
         $this->paniers = new ArrayCollection(); // Initialisation de la collection de paniers
+        $this->paymentMethods = new ArrayCollection(); // Initialisation de la collection de moyens de paiement
     }
 
     public function getIdClient(): ?int
@@ -207,4 +214,45 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return $this->email;
     }
+
+        public function getPaymentMethods(): Collection
+    {
+        return $this->paymentMethods;
+    }
+
+    public function addPaymentMethod(PaymentMethod $paymentMethod): self
+    {
+        if (!$this->paymentMethods->contains($paymentMethod)) {
+            $this->paymentMethods->add($paymentMethod);
+            $paymentMethod->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removePaymentMethod(PaymentMethod $paymentMethod): self
+    {
+        if ($this->paymentMethods->removeElement($paymentMethod)) {
+            // set the owning side to null (unless already changed)
+            if ($paymentMethod->getClient() === $this) {
+                $paymentMethod->setClient(null);
+            }
+        }
+
+        return $this;
+
+    }
+
+    public function getStripeCustomerId(): ?string
+    {
+        return $this->stripeCustomerId;
+    }
+
+    public function setStripeCustomerId(?string $stripeCustomerId): self
+    {
+        $this->stripeCustomerId = $stripeCustomerId;
+
+        return $this;
+    }
+
 }

@@ -8,7 +8,7 @@ use App\Entity\ImageProduit;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
-class ImageProduitFixtures extends Fixture
+class ZImageProduitFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {

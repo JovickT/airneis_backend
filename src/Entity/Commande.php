@@ -36,6 +36,10 @@ class Commande
     #[ORM\Column(length: 20)]
     private ?string $etat = null;
 
+    #[ORM\ManyToOne(targetEntity: PaymentMethod::class)]
+    #[ORM\JoinColumn(name: "id_payment_method", referencedColumnName: "id", nullable: true)]
+    private ?PaymentMethod $paymentMethod = null;
+
     public function __construct()
     {
         $this->date_commande = new \DateTime();
@@ -110,6 +114,17 @@ class Commande
     public function setEtat(string $etat): self
     {
         $this->etat = $etat;
+        return $this;
+    }
+
+    public function getPaymentMethod(): ?PaymentMethod
+    {
+        return $this->paymentMethod;
+    }
+
+    public function setPaymentMethod(?PaymentMethod $paymentMethod): self
+    {
+        $this->paymentMethod = $paymentMethod;
         return $this;
     }
 }

@@ -42,6 +42,11 @@ create_payment_intent:
     controller: App\Controller\ApiController::createPaymentIntent
     methods: [POST]
 
+attach_payment_method:
+    path: /api/attach-payment-method
+    controller: App\Controller\ApiController::attachPaymentMethod
+    methods: [POST]
+
 app_panier:
     path: /api/panier
     controller: App\Controller\ApiController::savePanier
@@ -63,4 +68,9 @@ app_the_message:
 app_forgotPassword:
     path: /api/forgotPassword
     controller: App\Controller\ApiController::forgotPassword
+    methods: ['POST']
+
+app_userAdresses:
+    path: /api/userAdresses
+    controller: App\Controller\ApiController::userAdresses
     methods: ['POST']
