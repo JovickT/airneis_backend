@@ -37,6 +37,10 @@ class PaymentMethod
     #[ORM\JoinColumn(name: 'client_id', referencedColumnName: 'id_client', nullable: true)]
     private ?Client $client = null;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $etat = false;
+
+
     public function getId(): ?int
     {
         return $this->id;
@@ -110,6 +114,18 @@ class PaymentMethod
     public function setClient(?Client $client): self
     {
         $this->client = $client;
+
+        return $this;
+    }
+
+    public function getEtat(): bool
+    {
+        return $this->etat;
+    }
+
+    public function setEtat(bool $etat): self
+    {
+        $this->etat = $etat;
 
         return $this;
     }

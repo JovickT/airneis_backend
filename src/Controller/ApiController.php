@@ -348,7 +348,7 @@ class ApiController extends AbstractController
         $data = json_decode($request->getContent(), true);
         $amount = $data['amount'];
 
-        Stripe::setApiKey('sk_test_VePHdqKTYQjKNInc7u56JBrQ'); // Remplacez par votre clé secrète Stripe
+        Stripe::setApiKey($_ENV['STRIPE_API_KEY']);// Remplacez par votre clé secrète Stripe
 
         try {
             $paymentIntent = PaymentIntent::create([
@@ -421,6 +421,7 @@ class ApiController extends AbstractController
             $paymentMethodEntity->setBrand($paymentMethodBrand);
             $paymentMethodEntity->setExpMonth($paymentMethodExpMonth);
             $paymentMethodEntity->setExpYear($paymentMethodExpYear);
+            $paymentMethodEntity->setEtat(true);
             $paymentMethodEntity->setClient($user);
             $entityManager->persist($paymentMethodEntity);
             $entityManager->flush();
@@ -452,15 +453,16 @@ class ApiController extends AbstractController
         $methods = [];
 
         foreach ($paymentMethods as $paymentMethod) {
-            $methods[] = [
-                'id' => $paymentMethod->getStripePaymentMethodId(),
-                'last4' => $paymentMethod->getLast4(),
-                'exp_month' => $paymentMethod->getExpMonth(),
-                'exp_year' => $paymentMethod->getExpYear(),
-                'brand' => $paymentMethod->getBrand(),
-            ];
+            if($paymentMethod->getEtat() == true){
+                $methods[] = [
+                    'id' => $paymentMethod->getStripePaymentMethodId(),
+                    'last4' => $paymentMethod->getLast4(),
+                    'exp_month' => $paymentMethod->getExpMonth(),
+                    'exp_year' => $paymentMethod->getExpYear(),
+                    'brand' => $paymentMethod->getBrand(),
+                ];
+            }
         }
-
         return new JsonResponse(['paymentMethods' => $methods]);
     }
     #[Route('/api/panier', name: 'app_panier', methods: ['POST','GET'])]
@@ -529,65 +531,66 @@ class ApiController extends AbstractController
     }
 
     #[Route('/api/majPanier', name: 'app_maj_panier', methods: ['POST'])]
-    public function majPanier(Request $request, EntityManagerInterface $entityManager, PanierRepository $panierRepository, ClientRepository $clientRepository): JsonResponse
-    {
+public function majPanier(Request $request, EntityManagerInterface $entityManager, PanierRepository $panierRepository, ClientRepository $clientRepository): JsonResponse
+{
         $data = json_decode($request->getContent(), true);
         
         if (is_null($data)) {
             return new JsonResponse(['error' => 'Données invalides'], 400);
         }
-    
+
         // Récupérer les informations utilisateur et panier depuis la requête
         $user = $data['user'];
         $panierActuel = $data['panier'];
-    
+
         // Rechercher le client en base de données
         $client = $clientRepository->findOneBy(['email' => $user['email']]);
         if (!$client) {
             return new JsonResponse(['error' => 'Utilisateur non trouvé'], 404);
         }
-    
+
+
         // Récupérer le panier en cours de l'utilisateur
         $panierEnCours = $panierRepository->findOneBy(['client' => $client, 'etat' => 'en cours']);
-    
+        if($panierEnCours === []){
+            return new JsonResponse($this->convertPanierToArray($panierActuel), 200);
+        }
+
         if ($panierEnCours) {
             $lotsEnCours = $panierEnCours->getLots();
-    
-            // Si le panier actuel est vide, renvoyer le panier en cours
-            if (empty($panierActuel)) {
-                return new JsonResponse($this->convertPanierToArray($panierEnCours), 200);
+            
+            // Créer une map (tableau associatif) pour les lots en cours
+            $lotsMap = [];
+            foreach ($lotsEnCours as $lot) {
+                $lotsMap[$lot['id']] = $lot;
             }
-    
-            // Fusionner les éléments du panier actuel avec le panier en cours
+
+            // Mettre à jour ou ajouter les lots du panier actuel
             foreach ($panierActuel as $lotActuel) {
-                $found = false;
-                // foreach ($lotsEnCours as &$lotEnCours) {
-                //     if ($lotEnCours['id'] === $lotActuel['id']) {
-                //         $lotEnCours['quantite'] += $lotActuel['quantite'];
-                //         $found = true;
-                //         break;
-                //     }
-                // }
-                if (!$found) {
+                if (isset($lotsMap[$lotActuel['id']])) {
+                    // Si le lot existe déjà, mettre à jour sa quantité
+                    $lotsMap[$lotActuel['id']]['quantite'] = $lotActuel['quantite'];
+                } else {
+                    // Sinon, ajouter le lot au panier
                     $lotsEnCours[] = $lotActuel;
                 }
             }
-    
+
             $panierEnCours->setLots($lotsEnCours);
             $panierEnCours->setDateModification(new \DateTime());
-    
+
             $entityManager->persist($panierEnCours);
             $entityManager->flush();
-    
+
             $responsePanier = $this->convertPanierToArray($panierEnCours);
         } else {
-            // Si l'utilisateur n'a pas de panier en cours, renvoyer le panier actuel
+            // Si l'utilisateur n'a pas de panier en cours, créer un nouveau panier
             $responsePanier = $panierActuel;
         }
-    
+
         return new JsonResponse($responsePanier, 200);
     }
-    
+
     /**
      * Convertit un objet Panier en tableau associatif
      */
@@ -620,10 +623,9 @@ class ApiController extends AbstractController
 
         $commande = $this->commandeRepository->findOneBy(['reference' => $reference]);
 
-        $idCommande = $commande->getIdCommande();
+        $idCommande = $commande->getPaymentMethod();
 
-        $find = $this->paymentMethodRepository->findOneBy(['id' => $idCommande]);
-
+        $find = $this->paymentMethodRepository->findOneBy(['id' => $idCommande->getId()]);
         $resultat = [
             "id" => $find->getStripePaymentMethodId(),
             "brand" => $find->getBrand(),
@@ -642,124 +644,103 @@ class ApiController extends AbstractController
     #[Route('/api/commande', name: 'app_commande')]
     public function commande(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
+        // Définir la clé API Stripe
+        Stripe::setApiKey($_ENV['STRIPE_API_KEY']);
+        
         $data = json_decode($request->getContent(), true);
-    
+        
         if (is_null($data)) {
             return new JsonResponse(['error' => 'Données invalides'], 400);
         }
     
-        $repoL = $data['livraison'];
-        $repoU = $data['user'];
-        $repoP = $data['paiement']; // 'paiement' contient l'ID de la méthode de paiement
+        $livraisonData = $data['livraison'] ?? null;
+        $userData = $data['user'] ?? null;
+        $paymentData = $data['paiement'] ?? null;
     
-        $user = $this->clientRepository->findOneBy(['email' => $repoU['email']]);
+        if (!$livraisonData || !$userData || !$paymentData) {
+            return new JsonResponse(['error' => 'Données de livraison, utilisateur ou paiement manquantes'], 400);
+        }
+    
+        $user = $this->clientRepository->findOneBy(['email' => $userData['email']]);
     
         if (!$user) {
             return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
         }
     
         // Gestion de l'adresse
-        $rue = $repoL['adresse1'];
-        $cp = $repoL['cp'];
-        $ville = $repoL['ville'];
-        $pays = $repoL['pays'];
+        $rue = $livraisonData['adresse1'];
+        $cp = $livraisonData['cp'];
+        $ville = $livraisonData['ville'];
+        $pays = $livraisonData['pays'];
     
-        $check = $this->adresseRepository->findOneByAddress($rue, $cp, $ville, $pays);
+        $adresse = $this->adresseRepository->findOneByAddress($rue, $cp, $ville, $pays);
     
-        if (!$check) {
-            $newAdresse = new Adresses();
-            $newAdresse->setRue($rue);
-            $newAdresse->setCodePostal($cp);
-            $newAdresse->setVille($ville);
-            $newAdresse->setPays($pays);
-            $entityManager->persist($newAdresse);
+        if (!$adresse) {
+            $adresse = new Adresses();
+            $adresse->setRue($rue);
+            $adresse->setCodePostal($cp);
+            $adresse->setVille($ville);
+            $adresse->setPays($pays);
+            $entityManager->persist($adresse);
             $entityManager->flush();
-        } else {
-            $newAdresse = $this->adresseRepository->find($check->getId());
         }
     
-        if (isset($repoL['saveLivraison']) && $repoL['saveLivraison']) {
-            if (!$check) {
-                $user->addAdresse($newAdresse);
-            }
+        if ($livraisonData['saveLivraison'] ?? false) {
+            $user->addAdresse($adresse);
     
-            if (isset($repoL['telephone']) && $repoL['telephone']) {
-                $user->setTelephone($repoL['telephone']);
-            }
-    
-            $panier = $repoL['panier'];
-    
-            foreach ($panier as $value) {
-                $produit = $this->produitRepository->findOneBy(['nom' => $value['nom']]);
-                if ($produit) {
-                    $newQuantite = $produit->getQuantite() - $value['quantite'];
-                    $produit->setQuantite($newQuantite);
-                    $entityManager->persist($produit);
-                }
+            if ($livraisonData['telephone'] ?? false) {
+                $user->setTelephone($livraisonData['telephone']);
             }
         }
     
-        // Vérification et ajout de la méthode de paiement
-        if (isset($repoP['paymentMethodId'])) {
-            $paymentMethodId = $repoP['paymentMethodId'];
+        // Gestion de la méthode de paiement
+        $paymentMethodId = $paymentData['id'];
+        $paymentMethod = $this->paymentMethodRepository->findOneBy(['stripePaymentMethodId' => $paymentMethodId]);
     
-            // Vérifiez si la méthode de paiement existe déjà
-            $existingPaymentMethod = $this->paymentMethodRepository->findOneBy(['stripePaymentMethodId' => $paymentMethodId]);
+        if (!$paymentMethod) {
+            try {
+                $stripePaymentMethod = \Stripe\PaymentMethod::retrieve($paymentMethodId);
     
-            if (!$existingPaymentMethod) {
-                try {
-                    $paymentMethod = \Stripe\PaymentMethod::retrieve($paymentMethodId);
+                $paymentMethod = new PaymentMethod();
+                $paymentMethod->setStripePaymentMethodId($stripePaymentMethod->id);
+                $paymentMethod->setLast4($stripePaymentMethod->card->last4);
+                $paymentMethod->setBrand($stripePaymentMethod->card->brand);
+                $paymentMethod->setExpMonth($stripePaymentMethod->card->exp_month);
+                $paymentMethod->setExpYear($stripePaymentMethod->card->exp_year);
+                $paymentMethod->setClient($user);
     
-                    // Créer une nouvelle méthode de paiement dans la base de données
-                    $paymentMethodEntity = new PaymentMethod();
-                    $paymentMethodEntity->setStripePaymentMethodId($paymentMethod->id);
-                    $paymentMethodEntity->setLast4($paymentMethod->card->last4);
-                    $paymentMethodEntity->setBrand($paymentMethod->card->brand);
-                    $paymentMethodEntity->setExpMonth($paymentMethod->card->exp_month);
-                    $paymentMethodEntity->setExpYear($paymentMethod->card->exp_year);
-                    $paymentMethodEntity->setClient($user); // Assurez-vous que cette ligne est correcte pour votre modèle
-                    $entityManager->persist($paymentMethodEntity);
-                    $entityManager->flush();
-    
-                    $paymentMethodToAttach = $paymentMethodEntity;
-                } catch (\Exception $e) {
-                    return new JsonResponse(['error' => 'Erreur lors de la création de la méthode de paiement : ' . $e->getMessage()], 500);
-                }
-            } else {
-                $paymentMethodToAttach = $existingPaymentMethod;
+                $entityManager->persist($paymentMethod);
+                $entityManager->flush();
+            } catch (\Exception $e) {
+                return new JsonResponse(['error' => 'Erreur lors de la création de la méthode de paiement : ' . $e->getMessage()], 500);
             }
-        } else {
-            $paymentMethodToAttach = null;
+        }
+    
+        // Mise à jour du panier et des produits
+        foreach ($data['livraison']['panier'] as $item) {
+            $produit = $this->produitRepository->findOneBy(['nom' => $item['nom']]);
+            if ($produit) {
+                $newQuantite = $produit->getQuantite() - $item['quantite'];
+                $produit->setQuantite($newQuantite);
+                $entityManager->persist($produit);
+            }
         }
     
         // Création de la commande
-        $commande = new Commande();
-    
         try {
-            $paniers = $user->getPaniers();
-            foreach ($paniers as $panier) {
-                if ($panier->getEtat() === 'en cours') {
-                    $panier->setLots($panier->getLots());
-                    $panier->setEtat('terminé');
-                    break;
-                }
+            $panier = $user->getPaniers()->filter(fn($p) => $p->getEtat() === 'en cours')->first();
+            if ($panier) {
+                $panier->setLots($panier->getLots());
+                $panier->setEtat('terminé');
             }
     
-            date_default_timezone_set('Europe/Paris');
-            $date = new \DateTime();
-            $reference = $this->commandeRepository->generateRandomReference();
+            $commande = new Commande();
             $commande->setClient($user);
-            $commande->setReference($reference);
+            $commande->setReference($this->commandeRepository->generateRandomReference());
             $commande->setPanier($panier);
-            $commande->setDateCommande($date);
-    
-            if (isset($newAdresse)) {
-                $commande->setAdresse($newAdresse);
-            }
-    
-            if ($paymentMethodToAttach) {
-                $commande->setPaymentMethod($paymentMethodToAttach);
-            }
+            $commande->setDateCommande(new \DateTime('now', new \DateTimeZone('Europe/Paris')));
+            $commande->setAdresse($adresse);
+            $commande->setPaymentMethod($paymentMethod);
     
             $entityManager->persist($commande);
             $entityManager->persist($user);
@@ -769,23 +750,20 @@ class ApiController extends AbstractController
                 'client' => $user->getIdClient(),
                 'reference' => $commande->getReference(),
                 'panier' => $commande->getPanier()->getIdPanier(),
-                'paiement' => $paymentMethodToAttach? [
-                    'brand' => $paymentMethodToAttach->getBrand(),
-                    'last4' => $paymentMethodToAttach->getLast4(),
-                    'exp_month' => $paymentMethodToAttach->getExpMonth(),
-                    'exp_year' => $paymentMethodToAttach->getExpYear(),
-                ] : null,
+                'paiement' => [
+                    'brand' => $paymentMethod->getBrand(),
+                    'last4' => $paymentMethod->getLast4(),
+                    'exp_month' => $paymentMethod->getExpMonth(),
+                    'exp_year' => $paymentMethod->getExpYear(),
+                ],
                 'date_commande' => $commande->getDateCommande()->format('Y-m-d H:i:s'),
             ];
     
             return new JsonResponse(['success' => 'Commande enregistrée avec succès', 'commande' => $orderDetails]);
         } catch (\Exception $e) {
-            return new JsonResponse(['error' => $e->getMessage()], 500);
+            return new JsonResponse(['error' => 'Erreur lors de la création de la commande : ' . $e->getMessage()], 500);
         }
     }
-    
-    
-    
     
 
     #[Route('/api/mesCommandes', name: 'app_mes_commandes')]
