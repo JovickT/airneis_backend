@@ -145,7 +145,7 @@ class ApiController extends AbstractController
             $allProduit[] = $produit;
         }
 
- 
+
         if (!empty($allProduit)) {
             return $this->json($allProduit, 200, [
                 'Access-Control-Allow-Origin' => '*'
@@ -190,7 +190,7 @@ class ApiController extends AbstractController
                     $image = $imageProduit->getImage();
                     if ($image) {
                         $imageLinks= 'https://localhost:8000/uploads/'.$image->getLien();
-    
+
                     }
                 }
                 $tab['images'] = $imageLinks;
@@ -207,7 +207,7 @@ class ApiController extends AbstractController
                     'Access-Control-Allow-Origin' => '*'
                 ]);
            }
-          
+
        }
 
         return $this->json(['error' => 'Category not specified'], 400, [
@@ -219,11 +219,11 @@ class ApiController extends AbstractController
     public function searchProduits(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-    
+
         if (is_null($data)) {
             return new JsonResponse(['error' => 'Données invalides'], 400);
         }
-    
+
         $criteria = [
             "in_stock" => $data["stock"],
             "price_max" => $data["maxPrice"],
@@ -232,16 +232,16 @@ class ApiController extends AbstractController
             "material" => $data["materiaux"],
             "category" => $data["categories"],
         ];
-    
+
         $products = $this->rechercheRepository->searchProduits($criteria);
-    
+
         $resultat = [];
         foreach ($products as $product) {
             $imageProduit = $this->imageProduitRepository->findOneBy(["produit" => $product]);
-    
+
             if ($imageProduit) {
                 $image = $this->imageRepository->find($imageProduit->getImage()->getIdImage());
-    
+
                 if ($image) {
                     $resultat[] = [
                         "nom" => $product->getNom(),
@@ -254,12 +254,12 @@ class ApiController extends AbstractController
                 }
             }
         }
-    
+
         return $this->json($resultat, 200, [
             'Access-Control-Allow-Origin' => '*'
         ]);
     }
-    
+
 
 
 
@@ -269,7 +269,7 @@ class ApiController extends AbstractController
     // public function imagesCarrousel(Request $request): JsonResponse
     // {
 
-     
+
 
     //    if ($imageCarrousel) {
 
@@ -278,7 +278,7 @@ class ApiController extends AbstractController
     //         foreach ($imageProduits as $imageProduit) {
     //             $produitNom = $imageProduit->getIdProduit()->getNom();
     //           $imageLien = $this->getParameter('app.url') . '/uploads/' . $imageProduit->getIdImage()->getLien();
-        
+
     //             // Vérifier si le produit existe déjà dans le tableau data
     //             if (!isset($data[$produitNom])) {
     //                 $data[$produitNom] = [
@@ -286,14 +286,14 @@ class ApiController extends AbstractController
     //                     'images' => []
     //                 ];
     //             }
-        
+
     //             // Ajouter le lien de l'image au produit correspondant
     //             $data[$produitNom]['images'][] = $imageLien;
     //         }
-    
+
     //     // Réindexer le tableau pour s'assurer qu'il est bien formaté en JSON
     //         $data = array_values($data);
-            
+
 
     //        return $this->json($data, 200, [
     //            'Access-Control-Allow-Origin' => '*'
@@ -306,7 +306,7 @@ class ApiController extends AbstractController
     // }
 
 
-    
+
     #[Route('/api/register', name: 'api_register', methods: ['POST'])]
     public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
@@ -442,7 +442,7 @@ class ApiController extends AbstractController
         }
 
         $email = $data['email']; // Décoder la chaîne JSON en tableau associatif
-        
+
         $user = $this->clientRepository->findOneBy(['email' => $email]);
 
         if (is_null($user)) {
@@ -470,7 +470,7 @@ class ApiController extends AbstractController
     {
         $data = json_decode($request->query->get('test'), true);
         $user = json_decode($request->query->get('user'), true);
-        
+
 
         if (is_null($data)) {
             return new JsonResponse(['error' => 'Données invalides'], 400);
@@ -511,7 +511,7 @@ class ApiController extends AbstractController
                 // dd($panierEnCours);
             } else {
                 // Sinon, créez un nouveau panier
-                
+
                 $panier = new Panier();
                 $panier->setLots($data);
                 $panier->setClient($client);
@@ -534,7 +534,7 @@ class ApiController extends AbstractController
 public function majPanier(Request $request, EntityManagerInterface $entityManager, PanierRepository $panierRepository, ClientRepository $clientRepository): JsonResponse
 {
         $data = json_decode($request->getContent(), true);
-        
+
         if (is_null($data)) {
             return new JsonResponse(['error' => 'Données invalides'], 400);
         }
@@ -558,7 +558,7 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
 
         if ($panierEnCours) {
             $lotsEnCours = $panierEnCours->getLots();
-            
+
             // Créer une map (tableau associatif) pour les lots en cours
             $lotsMap = [];
             foreach ($lotsEnCours as $lot) {
@@ -598,7 +598,7 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
     {
         $lots = $panier->getLots();
         $result = [];
-    
+
         foreach ($lots as $lot) {
             $result[] = [
                 'id' => $lot['id'] ?? null,
@@ -610,10 +610,10 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
                 'image' => $lot['image'] ?? null,
             ];
         }
-    
+
         return $result;
     }
-    
+
 
     #[Route('/api/get-payment-methods-commande', name: 'app_get_payment_methods_commande', methods: ['POST'])]
     public function getPayementCommande(Request $request, EntityManagerInterface $entityManager): JsonResponse
@@ -646,35 +646,35 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
     {
         // Définir la clé API Stripe
         Stripe::setApiKey($_ENV['STRIPE_API_KEY']);
-        
+
         $data = json_decode($request->getContent(), true);
-        
+
         if (is_null($data)) {
             return new JsonResponse(['error' => 'Données invalides'], 400);
         }
-    
+
         $livraisonData = $data['livraison'] ?? null;
         $userData = $data['user'] ?? null;
         $paymentData = $data['paiement'] ?? null;
-    
+
         if (!$livraisonData || !$userData || !$paymentData) {
             return new JsonResponse(['error' => 'Données de livraison, utilisateur ou paiement manquantes'], 400);
         }
-    
+
         $user = $this->clientRepository->findOneBy(['email' => $userData['email']]);
-    
+
         if (!$user) {
             return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
         }
-    
+
         // Gestion de l'adresse
         $rue = $livraisonData['adresse1'];
         $cp = $livraisonData['cp'];
         $ville = $livraisonData['ville'];
         $pays = $livraisonData['pays'];
-    
+
         $adresse = $this->adresseRepository->findOneByAddress($rue, $cp, $ville, $pays);
-    
+
         if (!$adresse) {
             $adresse = new Adresses();
             $adresse->setRue($rue);
@@ -684,23 +684,23 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
             $entityManager->persist($adresse);
             $entityManager->flush();
         }
-    
+
         if ($livraisonData['saveLivraison'] ?? false) {
             $user->addAdresse($adresse);
-    
+
             if ($livraisonData['telephone'] ?? false) {
                 $user->setTelephone($livraisonData['telephone']);
             }
         }
-    
+
         // Gestion de la méthode de paiement
         $paymentMethodId = $paymentData['id'];
         $paymentMethod = $this->paymentMethodRepository->findOneBy(['stripePaymentMethodId' => $paymentMethodId]);
-    
+
         if (!$paymentMethod) {
             try {
                 $stripePaymentMethod = \Stripe\PaymentMethod::retrieve($paymentMethodId);
-    
+
                 $paymentMethod = new PaymentMethod();
                 $paymentMethod->setStripePaymentMethodId($stripePaymentMethod->id);
                 $paymentMethod->setLast4($stripePaymentMethod->card->last4);
@@ -708,14 +708,14 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
                 $paymentMethod->setExpMonth($stripePaymentMethod->card->exp_month);
                 $paymentMethod->setExpYear($stripePaymentMethod->card->exp_year);
                 $paymentMethod->setClient($user);
-    
+
                 $entityManager->persist($paymentMethod);
                 $entityManager->flush();
             } catch (\Exception $e) {
                 return new JsonResponse(['error' => 'Erreur lors de la création de la méthode de paiement : ' . $e->getMessage()], 500);
             }
         }
-    
+
         // Mise à jour du panier et des produits
         foreach ($data['livraison']['panier'] as $item) {
             $produit = $this->produitRepository->findOneBy(['nom' => $item['nom']]);
@@ -725,7 +725,7 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
                 $entityManager->persist($produit);
             }
         }
-    
+
         // Création de la commande
         try {
             $panier = $user->getPaniers()->filter(fn($p) => $p->getEtat() === 'en cours')->first();
@@ -733,7 +733,7 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
                 $panier->setLots($panier->getLots());
                 $panier->setEtat('terminé');
             }
-    
+
             $commande = new Commande();
             $commande->setClient($user);
             $commande->setReference($this->commandeRepository->generateRandomReference());
@@ -741,11 +741,11 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
             $commande->setDateCommande(new \DateTime('now', new \DateTimeZone('Europe/Paris')));
             $commande->setAdresse($adresse);
             $commande->setPaymentMethod($paymentMethod);
-    
+
             $entityManager->persist($commande);
             $entityManager->persist($user);
             $entityManager->flush();
-    
+
             $orderDetails = [
                 'client' => $user->getIdClient(),
                 'reference' => $commande->getReference(),
@@ -758,13 +758,13 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
                 ],
                 'date_commande' => $commande->getDateCommande()->format('Y-m-d H:i:s'),
             ];
-    
+
             return new JsonResponse(['success' => 'Commande enregistrée avec succès', 'commande' => $orderDetails]);
         } catch (\Exception $e) {
             return new JsonResponse(['error' => 'Erreur lors de la création de la commande : ' . $e->getMessage()], 500);
         }
     }
-    
+
 
     #[Route('/api/mesCommandes', name: 'app_mes_commandes')]
     public function mesCommande(Request $request, EntityManagerInterface $entityManager): JsonResponse
@@ -772,7 +772,7 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
 
         $data = json_decode($request->getContent(), true);
         // dd($data);
-    
+
         if (is_null($data)) {
             return new JsonResponse(['error' => 'Données invalides'], 400);
         }
@@ -780,14 +780,14 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
         $email = $data['email'];
 
         $user = $this->clientRepository->findOneBy(['email' => $email]);
-    
+
         if (!$user) {
             return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
         }
-    
+
         $commandes = $this->commandeRepository->findBy(['client' => $user], ['date_commande' => 'DESC']);
         $commandesDetails = [];
-    
+
         if (isset($commandes) && $commandes) {
             $prix = 0;
             foreach ($commandes as $commande) {
@@ -823,12 +823,12 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
                     'adresse' => $adresse,
                     'ttc' => $prix,
                     'tva' => $prix * 0.2,
-                    'etat' => $commande->getEtat() 
-                ];  
+                    'etat' => $commande->getEtat()
+                ];
                 $prix = 0;
             }
         }
-    
+
         return new JsonResponse(['success' => $commandesDetails]);
     }
 
@@ -837,7 +837,7 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
     {
 
         $data = json_decode($request->getContent(), true);
-    
+
         if (is_null($data)) {
             return new JsonResponse(['error' => 'Données invalides'], 400);
         }
@@ -899,7 +899,7 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
         if (is_null($data)) {
             return new JsonResponse(['error' => 'Données invalides'], 400);
         }
-        
+
         // dd($data);
         if( isset($data['email']) && $data['email']){
             $user = $this->clientRepository->findOneBy(['email' => $data['email']]);
@@ -930,5 +930,86 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
 
     }
 
+    #[Route('/api/return', name: 'app_return', methods: ['POST'])]
+    public function RemoveArticle(Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
     
+        if (is_null($data)) {
+            return new JsonResponse(['error' => 'Données invalides'], 400);
+        }
+    
+        $user = $this->clientRepository->findOneBy(['email' => $data['email']]);
+    
+        if (!$user) {
+            return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
+        }
+    
+        $reference = $data['reference'];
+        $commande = $this->commandeRepository->findOneBy(['reference' => $reference]);
+    
+        if (!$commande) {
+            return new JsonResponse(['error' => 'Commande non trouvée'], 404);
+        }
+    
+        $articlesARetourner = $data['articles']; // Array of article names or IDs to return
+    
+        $panier = $commande->getPanier();
+        $lots = $panier->getLots(); // Récupère les lots du panier
+    
+        $articlesRetournes = [];
+    
+        // Suppression des articles retournés du panier
+        foreach ($lots as $key => $produit) {
+            foreach ($articlesARetourner as $article) {
+                if (
+                    $produit['nom'] === $article['nom'] &&
+                    $produit['prix'] === $article['prix'] &&
+                    $produit['categorie'] === $article['categorie'] &&
+                    $produit['description'] === $article['description'] &&
+                    $produit['image'] === $article['image']
+                ) {
+                    $articlesRetournes[] = $produit;
+                    unset($lots[$key]);
+                    break; // Break the inner loop if a match is found
+                }
+            }
+        }
+        
+
+        // Mise à jour du panier
+        $panier->setLots($lots);
+        $entityManager->persist($panier); // Persiste les changements dans le panier
+
+        $entityManager->flush();
+    
+        // Création du contenu de l'email
+        $emailContent = "Bonjour " . $user->getPrenom() . ",\n\n";
+        $emailContent .= "Nous vous confirmons la réception de votre demande de retour pour les articles suivants :\n\n";
+    
+        foreach ($articlesRetournes as $article) {
+            $emailContent .= "- " . $article['nom'] . " (Quantité: " . $article['quantite'] . ")\n";
+        }
+
+        if(isset($data['retour']) && $data['retour']){
+            $emailContent .= "\nVotre demande de retour a bien été prise en compte pour la commande #" . $commande->getReference() . ".\n";
+            $emailContent .= "Vous recevrez une confirmation par email une fois que le retour aura été traité.\n\n";
+            $emailContent .= "Cordialement,\nL'équipe Airneis";
+        
+            // Envoi de l'email
+            $email = (new Email())
+                ->from('contact@airneis.com')
+                ->to($user->getEmail())
+                ->subject('Confirmation de retour d\'article(s)')
+                ->text($emailContent);
+        
+            $mailer->send($email);
+
+            return new JsonResponse(['success' => 'Demande de retour enregistré'], 200);
+        }
+
+        return new JsonResponse(['success' => 'Suppression de l\'article effectué avec succès'], 200);
+    }
+    
+
 }
