@@ -14,6 +14,7 @@ use App\Repository\ImageRepository;
 use App\Repository\ProduitsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -55,11 +56,27 @@ class ProduitController extends AbstractController
         return $produits;
     }
 
+    private function getImagesFromUploads(): array
+{
+    $finder = new Finder();
+    $finder->files()->in($this->getParameter('images_directory'));
+
+    $images = [];
+    foreach ($finder as $file) {
+        $images[$file->getFilename()] = $file->getFilename();
+    }
+
+    return $images;
+}
+
     #[Route('/addProduct', name: 'app_form_produit')]
     public function displayAddForm(Request $request) : Response{
 
         $produit = new Produits();
-        $form = $this->createForm(FormProduitType::class, $produit);
+        $form = $this->createForm(FormProduitType::class,[
+            'images' => $this->getImagesFromUploads(),
+        ]);
+
         $form->handleRequest($request);
 
         if ($_POST) {

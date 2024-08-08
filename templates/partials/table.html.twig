@@ -93,12 +93,19 @@
                                         </form>
                                     </td>
                                   {% elseif app.request.attributes.get('_route') == 'app_image' %}
-                                    <td><a href="{{ path('app_form_image_upd', {'lien': row["lien"]}) }}" class="btn btn-primary" >MODIFIER</button></a>
-                                    <td>
-                                        <form id="deleteForm{{ loop.index }}" action="" method="post">
-                                            <button type="submit" class="btn btn-danger">Supprimer</button>
-                                        </form>
-                                    </td>
+                                    {% for row in images %}
+                                        <tr>
+                                        <td>{{ row.display|raw }}</td>
+                                        <td>
+                                            <a href="{{ path('app_form_image_upd', {'lien': row.lien}) }}" class="btn btn-primary">MODIFIER</a>
+                                        </td>
+                                        <td>
+                                            <form id="deleteForm{{ loop.index }}" action="{{ path('app_form_image_delete', { 'lien': row.lien }) }}" method="post">
+                                                <button type="submit" class="btn btn-danger">Supprimer</button>
+                                            </form>
+                                        </td>
+                                        </tr>
+                                    {% endfor %}
                                 {% else %}
                                     <td><a href="{{ path('app_dashbord') }}"><button class="btn btn-primary">Dashbord</button></a><td>
                                 {% endif %}
