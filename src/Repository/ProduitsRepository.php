@@ -146,7 +146,7 @@ class ProduitsRepository extends ServiceEntityRepository
             foreach ($images as $imageProduit) {
                 $image = $imageProduit->getImage();
                 if ($image) {
-                    $produitArray["images"] = 'https://localhost:8000/uploads/'.$image->getLien();
+                    $produitArray["images"][] = 'https://localhost:8000/uploads/'.$image->getLien();
 
                 }
             }

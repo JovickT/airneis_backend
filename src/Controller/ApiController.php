@@ -162,18 +162,21 @@ class ApiController extends AbstractController
     #[Route('/api/produits', name: 'Product_data')]
     public function ProductData(Request $request): JsonResponse
     {
-       // Récupérer le paramètre de requête
-       $produits = $request->query->get('produits');
-       $categories = $request->query->get('categories');
-
-       if ($produits) {
-           // Récupérer les produits de la catégorie
+        // Récupérer le paramètre de requête
+        $produits = $request->query->get('produits');
+        $categories = $request->query->get('categories');
+        if ($produits) {
+            // Récupérer les produits de la catégorie
             $data["theProduct"] = $this->produitRepository->findProductsByName($produits);
             $data["similary"] = $this->produitRepository->findProductsByCategoryName($categories);
             $myArray["theProduct"] = $data["theProduct"];
-           foreach ($data["similary"] as $key => $value) {
+    
+            foreach ($data["similary"] as $key => $value) {
+                // Réinitialiser $imageLinks pour chaque produit
+                $imageLinks = [];
+    
                 $res = $this->imageProduitRepository->findOneBy(["produit" => $value->getId()]);
-
+                
                 $tab['id'] =  $value->getId();
                 $tab['reference'] =  $value->getReference();
                 $tab['nom'] =  $value->getNom();
@@ -184,36 +187,34 @@ class ApiController extends AbstractController
                 $tab['marque'] =  $value->getMarque();
                 $tab['categorie'] =  $value->getCategorie();
                 $tab['materiaux'] =  $value->getMateriaux();
-
+                
                 $images = $value->getProduitImages();
-                foreach ($images as $imageProduit) {
+                foreach ($images as $key => $imageProduit) {
                     $image = $imageProduit->getImage();
                     if ($image) {
-                        $imageLinks= 'https://localhost:8000/uploads/'.$image->getLien();
-
+                        $imageLinks[] = $this->getParameter('app.url').'/uploads/'.$image->getLien();
                     }
                 }
                 $tab['images'] = $imageLinks;
                 $myArray["similary"][] = $tab;
-           }
-
-
-           if(!(empty($myArray["theProduct"]) || empty($myArray["similary"]))){
+            }
+    
+            if(!(empty($myArray["theProduct"]) || empty($myArray["similary"]))){
                 return $this->json($myArray, 200, [
                     'Access-Control-Allow-Origin' => '*'
                 ]);
-           }else{
+            }else{
                 return $this->json(['error' => 'Category not found'], 404, [
                     'Access-Control-Allow-Origin' => '*'
                 ]);
-           }
-
-       }
-
+            }
+        }
+    
         return $this->json(['error' => 'Category not specified'], 400, [
             'Access-Control-Allow-Origin' => '*'
         ]);
     }
+    
 
     #[Route('/api/search', name: 'search_produits', methods: ["POST", "GET"])]
     public function searchProduits(Request $request): JsonResponse

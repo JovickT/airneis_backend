@@ -70,81 +70,103 @@ class ProduitController extends AbstractController
 }
 
     #[Route('/addProduct', name: 'app_form_produit')]
-    public function displayAddForm(Request $request) : Response{
-
+    public function displayAddForm(Request $request): Response
+    {
         $produit = new Produits();
-        $form = $this->createForm(FormProduitType::class,[
-            'images' => $this->getImagesFromUploads(),
+
+        // Passez le chemin des images disponibles au formulaire
+        $form = $this->createForm(FormProduitType::class, $produit, [
+            'images_directory' => $this->getParameter('images_directory'),
         ]);
-
+    
         $form->handleRequest($request);
-
-        if ($_POST) {
-
+    
+        if ($form->isSubmitted() && $form->isValid()) {
             $produit = $form->getData();
+    
+            // Récupération des images sélectionnées
+            $selectedImages = $form->get('images')->getData();
+            foreach ($selectedImages as $imageFilename) {
+                $img = $this->imageRepository->findOneBy(['lien' => $imageFilename]);
+                $newImageproduit = new ImageProduit();
+                if(isset($img)) {
+                    $newImageproduit->setProduit($produit);
+                    $newImageproduit->setImage($img);
 
-            $date = new \DateTime();
-            $date->setTime(0, 0, 0); // Définit l'heure sur 00:00:00
+                    $this->entityManager->persist($newImageproduit);
+                }
 
-            $produit->setDateCreation($date);
-            
-            $categories = $this->categorieRepository->getAllCategories();
-
-            // Vérifier si le nom du produit saisi dans le formulaire existe déjà
-            if (in_array($_POST['form_produit']['categorie'], $categories)) {
-                $this->addFlash('error', 'produit déjà existant.');
-            }else{
-                $this->entityManager->persist($produit);
-                $this->entityManager->flush();
             }
-           
+    
+            $date = new \DateTime();
+            $date->setTime(0, 0, 0);
+            $produit->setDateCreation($date);
+    
+            $this->entityManager->persist($produit);
+            $this->entityManager->flush();
+    
             return $this->redirectToRoute('app_produit');
-            
         }
     
         return $this->render('forms/formProduit.html.twig', [
             'controller_name' => 'formClientController',
             'title' => 'Nouveau Produit',
             'form' => $form->createView(),
+            'images' => [], // Pas d'images pour un nouveau produit
         ]);
     }
 
+
+
     #[Route('/updProduit', name: 'app_form_produit_upd')]
     public function displayUpdForm(Request $request) : Response{
-        $produits = new Produits();
-        $form = $this->createForm(FormProduitType::class);
-
         $nom = $request->query->get('nom');
-        
-
-        // Récupérer l'objet Materiaux correspondant depuis la base de données
         $produits = $this->produitRepository->findOneBy(['nom' => $nom]);
-
-        if (!$nom) {
+    
+        if (!$produits) {
             throw $this->createNotFoundException('Le produit n\'a pas été trouvé.');
         }
-
-        // Créer le formulaire et le remplir avec les données du matériau
-        $form = $this->createForm(FormProduitType::class, $produits);
-
-        $form->handleRequest($request);
-
-        if ($_POST) {
-            // Pas besoin de récupérer $_POST, Symfony gère cela pour vous via le formulaire
     
-            // Flush l'EntityManager pour mettre à jour les modifications dans la base de données
+        $images = $produits->getProduitImages();
+
+        foreach ($images as $key => $image) {
+            $imagesProduit[] = $image->getImage()->getLien();
+        }
+    
+        // Passez le chemin des images disponibles au formulaire
+        $form = $this->createForm(FormProduitType::class, $produits, [
+            'images_directory' => $this->getParameter('images_directory'),
+        ]);
+    
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Récupération des images sélectionnées
+            $selectedImages = $form->get('images')->getData();
+            foreach ($selectedImages as $imageFilename) {
+                $img = $this->imageRepository->findOneBy(['lien' => $imageFilename]);
+                $newImageproduit = new ImageProduit();
+                if(isset($img)) {
+                    $newImageproduit->setProduit($produits);
+                    $newImageproduit->setImage($img);
+
+                    $this->entityManager->persist($newImageproduit);
+                }
+
+            }
+    
             $this->entityManager->flush();
     
-            // Rediriger ou retourner une réponse appropriée
             return $this->redirectToRoute('app_produit');
-
         }
+    
         return $this->render('forms/formProduit.html.twig', [
             'controller_name' => 'formClientController',
             'title' => 'Modifier Produit',
             'form' => $form->createView(),
+            'images' => $imagesProduit, // Passez les images associées au produit
         ]);
     }
+    
 
     #[Route('/deleteProduit{nom}', name: 'app_form_produit_delete')]
     public function displayDeleteForm(EntityManagerInterface $entityManager, $nom) : Response{
@@ -160,50 +182,5 @@ class ProduitController extends AbstractController
         $entityManager->flush();
     
         return $this->redirectToRoute('app_produit');
-    }
-
-    #[Route('/linkImage', name: 'app_form_image_upd')]
-    public function linkImage(Request $request) : Response{
-    
-        $imageProduit = new ImageProduit();
-        $lien = $request->query->get('lien');
-
-        // Récupérer l'objet Materiaux correspondant depuis la base de données
-        $image = $this->imageRepository->findOneBy(['lien' => $lien]);
-
-        if (!$image) {
-            throw $this->createNotFoundException('L\'image n\'a pas été trouvé.');
-        }
-       
-        // Créer le formulaire et le remplir avec les données du matériau
-        $form = $this->createForm(FormImageProduitType::class, $imageProduit);
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $imageProduitData = $form->getData();
-            
-            // Récupérez les entités associées
-            $image = $imageProduitData->getIdImage();
-            $produit = $imageProduitData->getIdProduit();
-            
-            $imageProduit->setImage($image);
-            $imageProduit->setProduit($produit);
-
-            // dd($test,$test1);
-
-            // // Persist the ImageProduit entity
-            $this->entityManager->persist($imageProduit);
-            $this->entityManager->flush();
-
-            $this->addFlash('success', 'opération réalisé avec succès');
-        }
-
-        return $this->render('forms/formImageProduit.html.twig', [
-            'controller_name' => 'formClientController',
-            'title' => 'Lier une Image à un Produit',
-            'form' => $form->createView(),
-        ]);
-     
     }
 }

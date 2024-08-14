@@ -15,6 +15,10 @@ class Image
     #[ORM\Column(type: 'integer')]
     private ?int $id_image = null;
 
+    #[ORM\Column(length: 40)]
+    private ?string $nom = null;
+
+
     #[ORM\Column(length: 255)]
     private ?string $lien = null;
 
@@ -24,6 +28,18 @@ class Image
     public function __construct()
     {
         $this->imageProduits = new ArrayCollection();
+    }
+
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+
+    public function setNom(string $nom): static
+    {
+        $this->nom = $nom;
+
+        return $this;
     }
 
     public function getIdImage(): ?int

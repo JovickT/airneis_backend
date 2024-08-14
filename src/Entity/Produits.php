@@ -185,4 +185,18 @@ class Produits
         }
         return $this;
     }
+
+    /**
+     * @return Collection|Image[]
+     */
+    public function getImages(): Collection
+    {
+        $images = new ArrayCollection();
+
+        foreach ($this->produitImages as $imageProduit) {
+            $images->add($imageProduit->getImage());
+        }
+
+        return $images;
+    }
 }

@@ -9,6 +9,7 @@
             <div class="card">
                 <h5 class="text-center my-4">Formulaire de Produit</h5>
                 <form class="form-card p-3" method="post">
+                {{ form_start(form) }}
                    {% block form_fields %}
                         <div class="row justify-content-between text-left">
                             <div class="form-group col-sm-6 flex-column d-flex"> 
@@ -50,18 +51,30 @@
                                {{ form_widget(form.categorie, { 'attr': {'class': 'form-control'}}) }}
                             </div>
                         </div>
+                         <!-- Aperçu des images existantes -->
                         <div class="row justify-content-between text-left">
-                            {% for image in produit.images %}
-                                <img src="{{ image.url }}" alt="{{ image.alt }}">
-                            {% endfor %}
+                            <div id="image-preview">
+                                {% if images is defined and images is not empty %}
+                                    {% for imageProduit in images %}
+                                        <img src="{{ asset('uploads/' ~ imageProduit) }}" style="max-width: 100px; margin-right: 10px;">
+                                    {% endfor %}
+                                {% else %}
+                                    <p>Aucune image disponible pour ce produit.</p>
+                                {% endif %}
+                            </div>
                         </div>
-                    {% endblock %}
 
-                    <div class="row justify-content-end">
-                        <div class="form-group col-sm-6"> 
-                            <button type="submit" class="btn-block btn-primary">Ajouter</button> 
+                        <!-- Champ pour sélectionner des images existantes -->
+                        <div class="row justify-content-between text-left">
+                            <div class="form-group col-sm-6 flex-column d-flex"> 
+                                <label class="form-control-label px-3">{{ form_label(form.images) }}</label> 
+                                {{ form_widget(form.images, { 'attr': {'class': 'form-control', 'multiple': true } }) }}
+                            </div>
                         </div>
-                    </div>
+                        </div>
+
+                    {% endblock %}
+                    {{ form_end(form) }}
                 </form>
             </div>
         </div>
@@ -69,31 +82,34 @@
 </div>
 
 {% block javascripts %}
-   <!-- Ajoutez cette balise <script> juste avant la fermeture de la balise </body> -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Sélectionnez l'élément de catégorie
         var categorieSelect = document.getElementById('form_produit_categorie');
-        // Ajoutez un écouteur d'événement pour détecter le changement de catégorie
         categorieSelect.addEventListener('change', function() {
-            // Récupérez l'option sélectionnée de la catégorie
-            console.log('options:',this.options,'\nselectedIndex:', this.selectedIndex,'\nselectedOption:',this.options[this.selectedIndex]);
             var selectedOption = this.options[this.selectedIndex];
-            // Récupérez la valeur de l'attribut "value" de l'option sélectionnée
             var categorieValue = selectedOption.innerText;
-
-            // Générez la référence en fonction de la catégorie
             var reference = categorieValue.substring(0, 3).toUpperCase() + Math.floor(Math.random() * 10000);
-
-            // Sélectionnez l'élément d'entrée de référence et mettez à jour sa valeur
             var referenceInput = document.getElementById('form_produit_reference');
             referenceInput.value = reference;
         });
+
+        const select = document.getElementById('form_produit_images');
+        const preview = document.getElementById('image-preview');
+
+        select.addEventListener('change', function() {
+            preview.innerHTML = ''; // Clear previous previews
+            console.log(select.selectedOptions); // Check selected options
+            Array.from(select.selectedOptions).forEach(option => {                
+                const imgSrc = '/uploads/' + option.value;
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.style.maxWidth = '100px';
+                img.style.marginRight = '10px';
+                preview.appendChild(img);
+            });
+        });
     });
 </script>
-
 {% endblock %}
 
 {% endblock %}
-
-

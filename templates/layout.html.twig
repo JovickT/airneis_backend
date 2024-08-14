@@ -30,7 +30,7 @@
 
 <body id="page-top">
 
-{% set images = [
+{% set myImages = [
     'undraw_posting_photo',
     'undraw_profile_1',
     'undraw_profile_2',
@@ -314,7 +314,7 @@
                                 {% for message in messages %}
                                     <a class="dropdown-item d-flex align-items-center" href="{{ path('app_the_message', { 'id': message.id }) }}">
                                         <div class="dropdown-list-image mr-3">
-                                           {% set random_image = random(images) %}
+                                           {% set random_image = random(myImages) %}
                                             <img class="rounded-circle" src="{{ asset('img/' ~ random_image ~ '.svg') }}" alt="...">
                                             <div class="status-indicator bg-success"></div>
                                         </div>

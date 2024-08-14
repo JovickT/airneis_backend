@@ -3,9 +3,12 @@
 namespace App\Form;
 
 use App\Entity\Categories;
+use App\Entity\Image;
 use App\Entity\Marques;
 use App\Entity\Produits;
+use App\Repository\ImageRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -15,8 +18,23 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class FormProduitType extends AbstractType
 {
+    private $imageRepository;
+
+    public function __construct(ImageRepository $imageRepository) {
+        $this->imageRepository = $imageRepository;
+    }
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+
+        $imagesDirectory = $this->imageRepository->findAll();
+        $imageChoices = [];
+
+        foreach ($imagesDirectory as $img) {
+            if(isset($img)) {
+                $imageChoices[$img->getnom()] = $img->getLien(); // Texte affiché et valeur identiques
+            }
+        }
+
         $builder
             ->add('reference', null, [
                 'attr' => [
@@ -69,20 +87,28 @@ class FormProduitType extends AbstractType
                 ] // Classes CSS supplémentaires
                 
             ])
-            ->add('produitImages', ChoiceType::class, [
-                'choices' => $options['images'],
+            // Champ pour sélectionner des images existantes
+            ->add('images', ChoiceType::class, [
+                'choices' => $imageChoices,
                 'multiple' => true,
-                'expanded' => true,
+                'expanded' => false,
+                'mapped' => false,  // Non lié directement à l'entité Produit
+                'required' => false,
+                'label' => 'Sélectionnez des images',
             ])
-            ->add('save', SubmitType::class, ['label' => 'Ajouter'])
+            ->add('save', SubmitType::class, [
+                'label' => 'Ajouter',
+                'attr' => ['class' => 'btn-block btn-primary col-sm-6 mt-2'],
+            ])
         ;
     }
 
-    public function configureOptions(OptionsResolver $resolver): void
+      public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Produits::class,
-            'images' => [], // Ajout de l'option images
         ]);
+
+        $resolver->setRequired('images_directory');
     }
 }

@@ -15,66 +15,60 @@
             <div class="card">
                 <h5 class="text-center my-4">Formulaire Image</h5>
                 <form class="form-card p-3" method="post" enctype="multipart/form-data">
+                {{ form_start(form) }}
                     {% block form_fields %}
-                        <div class="row justify-content-between text-left">
-                             <div class="form-group col-sm-6 flex-column d-flex"> 
-                                <label class="form-control-label px-3">{{ form_label(form.image) }}<span class="text-danger"> *</span></label> 
-                                {{ form_widget(form.image, { 'attr': {'class': 'form-control', 'placeholder': ''} }) }}
-                            </div>
-                        </div>
-                        <div class="d-flex flex-column text-left ml-2 mb-5">
-                            <label for="imagePreview">Preview:</label>
-                            <img id="imagePreview" src="" alt="Image preview" style="max-width: 300px; display: none;" />
-                        </div>
-                    {% endblock %}
-                    <div class="row justify-content-end">
-                        <div class="form-group col-sm-6"> 
-                            <button type="submit" class="btn-block btn-primary">Ajouter</button> 
+                    <div class="row justify-content-between text-left">
+                        <div class="form-group col-sm-6 flex-column d-flex">
+                            <label class="form-control-label px-3">
+                                {{ form_label(form.nom) }}
+                                <span class="text-danger"> *</span>
+                            </label>
+                            {{ form_widget(form.nom, { 'attr': {'class': 'form-control', 'placeholder': 'Enter le nom de l\'image'} }) }}
                         </div>
                     </div>
-                     {# {% if app.request.method == 'POST' %}
-                    <p>
-                        {% for key, value in app.request.request.all %}
-                            <strong>{{ key }}</strong>: 
-                            {% if value is iterable %}
-                                {% for subItem in value %}
-                                    {% if subItem is iterable %}
-                                        {% for subSubItem in subItem %}
-                                            {{ subSubItem }}{% if not loop.last %}, {% endif %}
-                                        {% endfor %}
-                                    {% else %}
-                                        {{ subItem }}
-                                    {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                {{ value }}
-                            {% endif %}
-                            <br>
-                        {% endfor %}
-                    </p>
-                {% endif %} #}
+
+                   {% if title == 'Ajouter une image' %}
+                        <div class="row justify-content-between text-left">
+                            <div class="form-group col-sm-6 flex-column d-flex">
+                                <label class="form-control-label px-3">
+                                    {{ form_label(form.image) }}
+                                    <span class="text-danger"> *</span>
+                                </label>
+                                {{ form_widget(form.image, { 'attr': {'class': 'form-control', 'placeholder': '', 'onchange': 'previewImage(event)'} }) }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="d-flex flex-column text-left ml-2 mb-5">
+                        <label for="imagePreview">Preview:</label>
+                        <img id="imagePreview" 
+                            src="{% if title != 'Téléchargement d\'Image' and images is not empty %}{{ asset('uploads/' ~ images.getLien()) }}{% endif %}"
+                            alt="Image preview" 
+                            style="max-width: 300px; display: {% if title != 'Téléchargement d\'Image' and images is not empty %}block{% else %}none{% endif %};" />
+                    </div>
+                    {% endblock %}
+                    {{ form_end(form) }}
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-  <script>
-        function previewImage(event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
+<script>
+    function previewImage(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
 
-            reader.onload = function(e) {
-                const imagePreview = document.getElementById('imagePreview');
-                imagePreview.src = e.target.result;
-                imagePreview.style.display = 'block';
-            }
-
-            if (file) {
-                reader.readAsDataURL(file);
-            }
+        reader.onload = function(e) {
+            const imagePreview = document.getElementById('imagePreview');
+            imagePreview.src = e.target.result;
+            imagePreview.style.display = 'block';
         }
 
-    </script>
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    }
+</script>
 
 {% endblock %}

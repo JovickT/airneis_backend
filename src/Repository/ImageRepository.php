@@ -64,6 +64,7 @@ class ImageRepository extends ServiceEntityRepository
         $imageData = [];
         foreach ($images as $image) {
             $imageData[] = [
+                'nom' => $image->getNom(),
                 'lien' => $image->getLien(),
                 'display' => "<img src='/uploads/{$image->getLien()}' alt='Image' width='100' />"
             ];
