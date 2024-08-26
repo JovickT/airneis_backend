@@ -92,7 +92,19 @@ class ApiController extends AbstractController
     {
         // Logique pour récupérer les données et les renvoyer
         $data['produit'] =  $this->produitRepository->getProduits();  // Données à renvoyer
-        $data['categorie'] =  $this->categorieRepository->getCategories();  // Données à renvoyer
+        $data['categorie'] =  $this->categorieRepository->getCategories();  // Données à renvoyer 
+        $carrousels = $this->carrouselRepository->findCarrouselsStartingWithSlide();
+
+        $url = [];
+        if(isset($carrousels)){
+            foreach ($carrousels as $carrousel) {
+                $images = $carrousel->getImages();
+                $rang = $carrousel->getRang()- 1;
+                foreach ($images as $key => $image) {
+                    $data['slide'][$rang]= $this->getParameter('app.url').'/uploads/'.$image ->getLien();
+                }
+            }
+        }
 
         return $this->json($data , 200, [
             'Access-Control-Allow-Origin' => '*'
@@ -119,7 +131,19 @@ class ApiController extends AbstractController
        if ($prodofCat) {
         $data = $this->produitRepository->findProductsByCategoryName($prodofCat);
 
+
         $allProduit = [];
+        $cate = $data[0]->getCategorie()->getNom();
+        if(isset($data)){
+            $carrousel = $this->carrouselRepository->findOneBy(['nom' => $cate])->getImages();
+            // dd($carrousel);
+            if(isset($carrousel)){
+                foreach ($carrousel as $key => $value) {
+                    $allProduit['baniere'] = $this->getParameter('app.url').'/uploads/'.$value ->getLien();
+                }
+            }
+        }
+
         foreach ($data as $key => $value) {
             $produit['id'] = $value->getId();
             $produit['reference'] = $value->getReference();
@@ -137,12 +161,15 @@ class ApiController extends AbstractController
             foreach ($images as $imageProduit) {
                 $image = $imageProduit->getImage();
                 if ($image) {
-                    $produit['image'] = 'https://localhost:8000/uploads/'.$image->getLien();
+                    $produit['image'][] = 'https://localhost:8000/uploads/'.$image->getLien();
 
                 }
             }
 
-            $allProduit[] = $produit;
+
+            $allProduit['produits'][] = $produit;
+            $produit['image'] = [];
+
         }
 
 
@@ -166,17 +193,27 @@ class ApiController extends AbstractController
         $produits = $request->query->get('produits');
         $categories = $request->query->get('categories');
         if ($produits) {
+
             // Récupérer les produits de la catégorie
             $data["theProduct"] = $this->produitRepository->findProductsByName($produits);
             $data["similary"] = $this->produitRepository->findProductsByCategoryName($categories);
             $myArray["theProduct"] = $data["theProduct"];
-    
+
+            $displayImage = $this->carrouselRepository->findOneBy(['nom' => $data["theProduct"][0]['nom']]);
+            if(isset($displayImage)){
+                $afficher = $displayImage->getImages();
+                
+                foreach ($afficher as $key => $image) {
+                    $myArray['afficher'] = $this->getParameter('app.url').'/uploads/'.$image->getLien();
+                }
+                
+            }
             foreach ($data["similary"] as $key => $value) {
                 // Réinitialiser $imageLinks pour chaque produit
                 $imageLinks = [];
-    
+
                 $res = $this->imageProduitRepository->findOneBy(["produit" => $value->getId()]);
-                
+
                 $tab['id'] =  $value->getId();
                 $tab['reference'] =  $value->getReference();
                 $tab['nom'] =  $value->getNom();
@@ -187,7 +224,7 @@ class ApiController extends AbstractController
                 $tab['marque'] =  $value->getMarque();
                 $tab['categorie'] =  $value->getCategorie();
                 $tab['materiaux'] =  $value->getMateriaux();
-                
+
                 $images = $value->getProduitImages();
                 foreach ($images as $key => $imageProduit) {
                     $image = $imageProduit->getImage();
@@ -198,7 +235,7 @@ class ApiController extends AbstractController
                 $tab['images'] = $imageLinks;
                 $myArray["similary"][] = $tab;
             }
-    
+
             if(!(empty($myArray["theProduct"]) || empty($myArray["similary"]))){
                 return $this->json($myArray, 200, [
                     'Access-Control-Allow-Origin' => '*'
@@ -209,12 +246,12 @@ class ApiController extends AbstractController
                 ]);
             }
         }
-    
+
         return $this->json(['error' => 'Category not specified'], 400, [
             'Access-Control-Allow-Origin' => '*'
         ]);
     }
-    
+
 
     #[Route('/api/search', name: 'search_produits', methods: ["POST", "GET"])]
     public function searchProduits(Request $request): JsonResponse
@@ -935,31 +972,31 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
     public function RemoveArticle(Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-    
+
         if (is_null($data)) {
             return new JsonResponse(['error' => 'Données invalides'], 400);
         }
-    
+
         $user = $this->clientRepository->findOneBy(['email' => $data['email']]);
-    
+
         if (!$user) {
             return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
         }
-    
+
         $reference = $data['reference'];
         $commande = $this->commandeRepository->findOneBy(['reference' => $reference]);
-    
+
         if (!$commande) {
             return new JsonResponse(['error' => 'Commande non trouvée'], 404);
         }
-    
+
         $articlesARetourner = $data['articles']; // Array of article names or IDs to return
-    
+
         $panier = $commande->getPanier();
         $lots = $panier->getLots(); // Récupère les lots du panier
-    
+
         $articlesRetournes = [];
-    
+
         // Suppression des articles retournés du panier
         foreach ($lots as $key => $produit) {
             foreach ($articlesARetourner as $article) {
@@ -976,18 +1013,18 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
                 }
             }
         }
-        
+
 
         // Mise à jour du panier
         $panier->setLots($lots);
         $entityManager->persist($panier); // Persiste les changements dans le panier
 
         $entityManager->flush();
-    
+
         // Création du contenu de l'email
         $emailContent = "Bonjour " . $user->getPrenom() . ",\n\n";
         $emailContent .= "Nous vous confirmons la réception de votre demande de retour pour les articles suivants :\n\n";
-    
+
         foreach ($articlesRetournes as $article) {
             $emailContent .= "- " . $article['nom'] . " (Quantité: " . $article['quantite'] . ")\n";
         }
@@ -996,14 +1033,14 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
             $emailContent .= "\nVotre demande de retour a bien été prise en compte pour la commande #" . $commande->getReference() . ".\n";
             $emailContent .= "Vous recevrez une confirmation par email une fois que le retour aura été traité.\n\n";
             $emailContent .= "Cordialement,\nL'équipe Airneis";
-        
+
             // Envoi de l'email
             $email = (new Email())
                 ->from('contact@airneis.com')
                 ->to($user->getEmail())
                 ->subject('Confirmation de retour d\'article(s)')
                 ->text($emailContent);
-        
+
             $mailer->send($email);
 
             return new JsonResponse(['success' => 'Demande de retour enregistré'], 200);
@@ -1011,6 +1048,6 @@ public function majPanier(Request $request, EntityManagerInterface $entityManage
 
         return new JsonResponse(['success' => 'Suppression de l\'article effectué avec succès'], 200);
     }
-    
+
 
 }

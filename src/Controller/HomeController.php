@@ -5,14 +5,13 @@ namespace App\Controller;
 use App\Entity\Adresses;
 use App\Entity\Carrousel;
 use App\Entity\Client;
-use App\Entity\ImageCarousel;
+use App\Form\FormCarrouselType;
 use App\Form\FormClientType;
 use App\Form\MessageFormType;
 use App\Repository\AdressesRepository;
 use App\Repository\CarrouselRepository;
 use App\Repository\ClientRepository;
 use App\Repository\ContactRepository;
-use App\Repository\ImageCarouselRepository;
 use App\Repository\ImageRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,7 +19,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
@@ -173,51 +171,26 @@ class HomeController extends AbstractController
 
     #[Route('/displayCarrouselImages', name: 'app_displayCarrouselImages')]
     public function displayCarrouselImages(Request $request) : Response{
-        $images = $this ->imageRepository->findAll();
-        $carrousels = $this ->carrouselRepository->findAll();
-        $tabCarrousels = [] ;
-        foreach ($carrousels as $key => $carrousel) {
-            $tabCarrousels[] = [
-                'page' => $carrousel->getPage(),
-                'quantite' => $carrousel->getQuantite()
+       
+        $carrosuel =  $this->carrouselRepository->findAll();
+        $infos = [];
+        foreach ($carrosuel as $key => $value) {
+            $images = $value->getImages();
+            $infos[] =[
+                'id' => $value->getId(),
+                'nom' => $value->getNom(),
+                'rang' => $value->getRang()
             ];
+            foreach ($images as $jey => $image) {
+                $infos[$key]['display'] = "<img src='/uploads/{$image->getLien()}' alt='Image' width='100' />";
+            }
         }
 
-        // dd($tabCarrousels);
-        $tabImages = [] ;
-        foreach ($images as $key => $image) {
-            $tabImages[] = $image->getlien();
-        }
-
-        if($_GET){
-            
-            $pageGet = $request->query->get('page');
-            $imageGet = $request->query->get('image');
-            $rangGet = $request->query->get('rang');
-
-            $page = $this ->carrouselRepository->find(['page' => $pageGet]);
-            $image = $this ->imageRepository->find(['lien' => $imageGet]);
-
-            // dd($page);
-            $imageCarrousel = new ImageCarousel();
-
-        
-            $imageCarrousel -> setCarrousel($page);
-            $imageCarrousel -> setImage($image);
-            $imageCarrousel -> setRang($rangGet);
-
-            $this->entityManager->persist($imageCarrousel);
-            $this->entityManager->flush();
-
-           
-        }
-
-        // $images = $this ->imageCarrouselRepository->findAll();
-        // dd($tabImages);
         return $this->render('carrousel.html.twig', [
             'controller_name' => 'formClientController',
-            'images' => $tabImages,
-            'carrousel' => $tabCarrousels
+            'infos' => $infos,
+            'title' => "Formualire Ajout de Carrousel",
+            'tableHedears' => ['Id','Nom','Rang','Images']
         ]);
     }
 
@@ -268,6 +241,95 @@ class HomeController extends AbstractController
             'form' => $form->createView(),
             'message' => $message
         ]);
+    }
+
+    #[Route('/carrousel/new', name: 'carrousel_new')]
+    public function new(Request $request, EntityManagerInterface $entityManager, ImageRepository $imageRepository): Response
+    {
+        $carrousel = new Carrousel();
+        $form = $this->createForm(FormCarrouselType::class, $carrousel, [
+            'image_repository' => $imageRepository, // Passe le repository ici
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $selectedImages = $form->get('images')->getData();
+            foreach ($selectedImages as $imageFilename) {
+                $img = $this->imageRepository->findOneBy(['lien' => $imageFilename]);
+                $carrousel->addImage($img);
+            }
+            $entityManager->persist($carrousel);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_displayCarrouselImages'); // Redirection après succès
+        }
+
+        return $this->render('forms/formCarrousel.html.twig', [
+            'carrousel' => $carrousel,
+            'form' => $form->createView(),
+            'title' => 'Nouveau Carrousel',
+            'images' => []
+        ]);
+    }
+
+    #[Route('/carrousel/update', name: 'carrousel_update')]
+    public function update(Request $request, EntityManagerInterface $entityManager, ImageRepository $imageRepository): Response
+    {
+        $id = $request->query->get('id');
+
+        $carrousel = $this->carrouselRepository->find($id);
+
+        if (!$carrousel) {
+            throw $this->createNotFoundException('Le carrousel n\'a pas été trouvé.');
+        }
+
+        $images = $carrousel->getImages();
+
+        foreach ($images as $key => $image) {
+            $infoImage[] = $image->getLien();
+        }
+
+        $form = $this->createForm(FormCarrouselType::class, $carrousel, [
+            'image_repository' => $imageRepository, // Passe le repository ici
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $selectedImages = $form->get('images')->getData();
+
+            $img = $this->imageRepository->findOneBy(['lien' => $selectedImages]);
+
+             // Supprimer les associations existantes
+            foreach ($carrousel->getImages() as $existingImage) {
+                $carrousel->removeImage($existingImage);
+            }
+
+            foreach ($selectedImages as $imageFilename) {
+                $carrousel->addImage($img);
+            }
+            $entityManager->persist($carrousel);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_displayCarrouselImages'); // Redirection après succès
+        }
+
+        return $this->render('forms/formCarrousel.html.twig', [
+            'carrousel' => $carrousel,
+            'form' => $form->createView(),
+            'title' => 'Modifier Carrousel',
+            'images' => $infoImage
+        ]);
+    }
+
+    #[Route('/carrousel/remove', name: 'carrousel_remove')]
+    public function remove(Request $request, EntityManagerInterface $entityManager, Carrousel $carrousel): Response
+    {
+       
+
+        return $this->redirectToRoute('app_displayCarrouselImages'); // Redirection après succès
+
     }
     
 }

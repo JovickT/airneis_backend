@@ -40,4 +40,18 @@ class CarrouselRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+     /**
+     * Récupère tous les carrousels dont le nom commence par "slide" ou "Slide"
+     * 
+     * @return Carrousel[] Returns an array of Carrousel objects
+     */
+    public function findCarrouselsStartingWithSlide(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('LOWER(c.nom) LIKE :prefix')
+            ->setParameter('prefix', 'slide%')
+            ->getQuery()
+            ->getResult();
+    }
 }

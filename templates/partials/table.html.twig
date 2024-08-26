@@ -20,6 +20,8 @@
                     <a href="{{ path('app_form_categorie') }}"><button class="btn btn-primary">Ajouter une catégorie</button></a>
                 {% elseif app.request.attributes.get('_route') == 'app_image' %}
                     <a href="{{ path('image_upload') }}"><button class="btn btn-primary">Ajouter une image</button></a>
+                 {% elseif app.request.attributes.get('_route') == 'app_displayCarrouselImages' %}
+                    <a href="{{ path('carrousel_new') }}"><button class="btn btn-primary">Ajouter une image carrousel</button></a>
                 {% else %}
                     <a href="{{ path('app_dashbord') }}"><button class="btn btn-primary">Dashbord</button></a>
                 {% endif %}
@@ -101,6 +103,14 @@
                                         </form>
 
                                     </td>
+                                    {% elseif app.request.attributes.get('_route') == 'app_displayCarrouselImages' %}
+                                        <td><a href="{{ path('carrousel_update', {'id': row["id"]}) }}" class="btn btn-primary" >MODIFIER</button></a>
+                                        <td>
+                                            <form id="deleteForm{{ loop.index }}" action="{{ path('carrousel_remove', {'id': row["id"]}) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this image?');">
+                                                <button type="submit" class="btn btn-danger">Supprimer</button>
+                                            </form>
+
+                                        </td>
                                 {% else %}
                                     <td><a href="{{ path('app_dashbord') }}"><button class="btn btn-primary">Dashbord</button></a><td>
                                 {% endif %}

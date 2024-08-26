@@ -1,58 +1,6 @@
+
 {% extends 'layout.html.twig' %}
 
 {% block content %}
-
-  {% for key, c in carrousel %}
-
-    <p>
-      <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample{{ loop.index }}" role="button" aria-expanded="false" aria-controls="collapseExample">
-        {{c.page}}
-      </a>
-    </p>
-
-    <div class="collapse mb-5" id="collapseExample{{ loop.index }}">
-      <div class="card card-body">
-        <div class="d-flex align-items-center " id="{{c.page}}">
-          {% for i in range(1, c.quantite) %}
-            <div class="d-flex align-items-center justify-content-center mr-3" style="width: 250px; height:150px; border: 1px solid #ccc; border-radius: 15px;">
-              <i id="add{{c.page}}{{ loop.index }}" class="fas fa-plus-square" style="font-size:24px; cursor: pointer;"></i>
-            </div>
-          {% endfor %}
-          <i id="addDiv{{key}}" class="fas fa-plus-square" style="font-size:24px; cursor: pointer;"></i>
-        </div>
-      </div>
-    </div>
-
-    <div class="custom-selecte" id="custom-select">
-      <div class="custom-options" id="custom-options">
-        {% for image in images %}
-          <span class="d-flex flex-column custom-option mt-4" data-value="{{ loop.index }}">
-            <a href="{{ path('app_displayCarrouselImages', { 'page': c.page, 'image': image, 'rang': loop.index }) }}"><img src="https://localhost:8000/uploads/{{ image }}" alt="{{ image }}" width="100"></a>
-          </span>
-        {% endfor %}
-      </div>
-    </div>
-  {% endfor %}
-
-   
-    
-
-
-  {% block stylesheets %}
-<style>
-  .custom-options{
-    height: 30vh;
-    overflow-y: scroll;
-  }
-
-  .custom-selecte{
-    display: none;
-    width: 15%;
-  }
-</style>
+    {% include 'partials/table.html.twig' with {'headers': tableHedears, 'rows': infos} %}
 {% endblock %}
-
-{% include 'partials/verification.html.twig' %}
-
-{% endblock %}
-

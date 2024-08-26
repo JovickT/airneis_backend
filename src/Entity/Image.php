@@ -25,9 +25,13 @@ class Image
     #[ORM\OneToMany(targetEntity: ImageProduit::class, mappedBy: 'image')]
     private Collection $imageProduits;
 
+    #[ORM\ManyToMany(mappedBy: 'images', targetEntity: Carrousel::class)]
+    private Collection $carrousels;
+
     public function __construct()
     {
         $this->imageProduits = new ArrayCollection();
+        $this->carrousels = new ArrayCollection();
     }
 
     public function getNom(): ?string
@@ -84,5 +88,10 @@ class Image
             }
         }
         return $this;
+    }
+
+    public function getCarrousels(): Collection
+    {
+        return $this->carrousels;
     }
 }
