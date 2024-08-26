@@ -51,18 +51,26 @@
                                {{ form_widget(form.categorie, { 'attr': {'class': 'form-control'}}) }}
                             </div>
                         </div>
-                         <!-- Aperçu des images existantes -->
+                        <!-- Aperçu des images existantes avec possibilité de suppression -->
                         <div class="row justify-content-between text-left">
                             <div id="image-preview">
                                 {% if images is defined and images is not empty %}
-                                    {% for imageProduit in images %}
+                                  {% for key, imageProduit in images %}
+                                    <div class="image-container" style="position: relative; display: inline-block;">
                                         <img src="{{ asset('uploads/' ~ imageProduit) }}" style="max-width: 100px; margin-right: 10px;">
-                                    {% endfor %}
+                                        <button type="button" class="btn btn-danger btn-sm remove-image" 
+                                                style="position: absolute; top: 0; right: 0; background-color: rgba(255, 0, 0, 0.7);" 
+                                                data-image-id="{{ key }}">
+                                            &times;
+                                        </button>
+                                    </div>
+                                {% endfor %}
                                 {% else %}
                                     <p>Aucune image disponible pour ce produit.</p>
                                 {% endif %}
                             </div>
                         </div>
+
 
                         <!-- Champ pour sélectionner des images existantes -->
                         <div class="row justify-content-between text-left">
@@ -83,33 +91,37 @@
 
 {% block javascripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var categorieSelect = document.getElementById('form_produit_categorie');
-        categorieSelect.addEventListener('change', function() {
-            var selectedOption = this.options[this.selectedIndex];
-            var categorieValue = selectedOption.innerText;
-            var reference = categorieValue.substring(0, 3).toUpperCase() + Math.floor(Math.random() * 10000);
-            var referenceInput = document.getElementById('form_produit_reference');
-            referenceInput.value = reference;
-        });
+   document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.remove-image').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var imageId = this.getAttribute('data-image-id');
+            var container = this.parentNode;
 
-        const select = document.getElementById('form_produit_images');
-        const preview = document.getElementById('image-preview');
-
-        select.addEventListener('change', function() {
-            preview.innerHTML = ''; // Clear previous previews
-            console.log(select.selectedOptions); // Check selected options
-            Array.from(select.selectedOptions).forEach(option => {                
-                const imgSrc = '/uploads/' + option.value;
-                const img = document.createElement('img');
-                img.src = imgSrc;
-                img.style.maxWidth = '100px';
-                img.style.marginRight = '10px';
-                preview.appendChild(img);
-            });
+            // Requête Ajax pour supprimer la relation produit-image
+            fetch('{{ path('product_image_remove') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': '{{ csrf_token('remove_image') }}'
+                },
+                body: JSON.stringify({ imageProduitId: imageId, tableau: images })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    container.remove(); // Supprime l'image du DOM
+                } else {
+                    alert('Une erreur est survenue lors de la suppression de l\'image.');
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
         });
     });
+});
+
 </script>
 {% endblock %}
+
 
 {% endblock %}

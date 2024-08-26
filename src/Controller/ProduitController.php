@@ -15,6 +15,7 @@ use App\Repository\ProduitsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -151,9 +152,8 @@ class ProduitController extends AbstractController
 
                     $this->entityManager->persist($newImageproduit);
                 }
-
             }
-    
+
             $this->entityManager->flush();
     
             return $this->redirectToRoute('app_produit');
@@ -183,4 +183,27 @@ class ProduitController extends AbstractController
     
         return $this->redirectToRoute('app_produit');
     }
+    #[Route('/product/remove-image', name: 'product_image_remove')]
+    public function removeImage(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+    
+        if (!$data || !isset($data['imageProduitId'])) {
+            return new JsonResponse(['success' => false, 'error' => 'Invalid data'], 400);
+        }
+    
+        $imageProduitId = $data['imageProduitId'];
+        $imageProduit = $this->imageProduitRepository->find($imageProduitId);
+    
+        if ($imageProduit) {
+            $produit = $imageProduit->getProduit();
+            $produit->removeProduitImage($imageProduit);
+            $entityManager->flush();
+    
+            return new JsonResponse(['success' => true]);
+        }
+    
+        return new JsonResponse(['success' => false], 400);
+    }
+    
 }
