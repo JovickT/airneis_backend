@@ -57,4 +57,40 @@ class AdminRepository extends ServiceEntityRepository implements PasswordUpgrade
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    public function getAllUsers(){
+        $users = $this->createQueryBuilder('c')
+        ->getQuery()
+        ->getResult();
+
+        $usersArray = [];
+        foreach ($users as $user) {
+            $userData = [];
+            $userData['prenom'] = $user->getPrenom();
+            $userData['nom'] = $user->getNom();
+            $userData['email'] = $user->getEmail();
+            $role = $user->getRoles();
+            if($role){
+                $userData['role'] = implode($role);
+            }else{
+                $userData['role'] = '';
+            }
+    
+            $usersArray[] = $userData;
+        }
+
+        return $usersArray;
+    }
+
+    public function getAllEmails(): array
+    {
+        $emails = $this->createQueryBuilder('c')
+            ->select('c.email')
+            ->getQuery()
+            ->getResult();
+
+        $emailList = array_column($emails, 'email');
+
+        return $emailList;
+    }
 }
